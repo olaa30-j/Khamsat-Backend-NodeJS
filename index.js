@@ -11,7 +11,8 @@ app.use(cors());
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(router)
-
+const messageRoutes = require('./routes/messageRoute');
+app.use('/message',messageRoutes);
 
 // mongodb setup 
 connectDB();
