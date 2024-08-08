@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-let messageSchema = mongoose.Schema({
+let messageSchema = Schema({
     content : {
         type : String,
         required : true,
@@ -49,8 +49,8 @@ messageSchema.pre('save',function(next){
     next();
 });
 
-let messageModel = mongoose.model("Message",messageSchema);
-module.exports = messageModel;
+let messageModel = model("Message",messageSchema);
+export default messageModel;
 
 
 

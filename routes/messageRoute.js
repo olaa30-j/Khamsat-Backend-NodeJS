@@ -1,6 +1,6 @@
-const express = require('express');
-let router = express.Router();
-const{createMessage} = require('../controllers/messageCont');
+import { Router } from 'express';
+let router = Router();
+import { createMessage } from '../controllers/messageCont.js';
 
 router.post("/",createMessage);
 
@@ -8,4 +8,4 @@ router.post("/",createMessage);
 
 
 
-module.exports = router;
+export default router;

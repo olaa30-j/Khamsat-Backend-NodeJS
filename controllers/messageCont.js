@@ -1,9 +1,9 @@
-const messageModel = require('../models/messageMod');
+import messages from '../models/messageMod.js';
 //======================================= Creating new message ==================================================//
-exports.createMessage= async (req, res) => {
+export async function createMessage(req, res) {
     try {
       let newMessage = req.body;
-      let message = await messageModel.create(newMessage);
+      let message = await messages.create(newMessage);
 
       res.status(201).json({ message: "success creating message", data: message });
 
@@ -11,4 +11,4 @@ exports.createMessage= async (req, res) => {
       res.status(400).json({ message: "failed to create message" });
     }
 
-  };
+  }
