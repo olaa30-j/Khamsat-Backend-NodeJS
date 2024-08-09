@@ -1,23 +1,26 @@
-import express from 'express';
+import express from 'express' ;
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import connectDB from './config/db.js';
-import cors from 'cors';
-import router from './router/router.js';
 
-dotenv.config()
-
-const app = express();
-app.use(cors());
-app.use(express.urlencoded({extended: true}));
+const app = express(); 
+dotenv.config();
 app.use(express.json());
-app.use(router)
-import messageRoutes from "./routes/messageRoute.js"
+
+const dbLink = process.env.MONGO_URL;
+const dbPort = process.env.PORT;
+
+
+import messageRoutes from './routes/messageRoute.js';
 app.use('/message',messageRoutes);
 
-// mongodb setup 
-connectDB();
 
-const {PORT} = process.env;
-app.listen(PORT,()=>{
-    console.log(`server is running on port ${PORT}`);
+mongoose.connect(dbLink).then(()=>{
+    console.log("connected to khamsat DB successfully")
+}).catch((err)=>{
+    console.log(err)
+})
+
+
+app.listen(dbPort,()=>{
+    console.log("app listenting to port")
 })
