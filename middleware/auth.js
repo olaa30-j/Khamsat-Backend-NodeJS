@@ -11,18 +11,18 @@ export const verfiyToken = async (req, res, next) =>{
 
     let decoded = await util.promisify(jwt.verify)(token, process.env.SECRET_KEY);
 
-    req.role = decoded.role;
+    req.user = decoded
 
     next();
 }
 
 export const checkRoles = (...roles) => {
     return (req, res, next) => {
-        if (!req.role) {
+        if (!req.user.role) {
             return res.status(401).send({ message: 'User not authenticated.' });
         }
         
-        if (!roles.includes(req.role)) {
+        if (!roles.includes(req.user.role)) {
             return res.status(403).send({ message: 'Invalid Access' });
         }
 
