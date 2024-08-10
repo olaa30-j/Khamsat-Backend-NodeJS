@@ -5,6 +5,8 @@ import carts from "./carts.js";
 import posts from "./posts.js";
 import orders from "./orders.js";
 import users from "./users.js";
+import notifications from "./notifications.js"
+import messages from "./messages.js"
 import { verfiyToken, checkRoles } from "../middleware/auth.js";
 // routers
 import subCategoriesRouter from './subCategories.js';
@@ -18,16 +20,19 @@ router.use("/carts", verfiyToken, checkRoles("user"), carts);
 router.use("/posts", posts);
 router.use("/orders", orders);
 router.use("/users", users);
+router.use("/notification", notifications);
+router.use("/message", messages);
+
 
 // categories
-app.use('/subCategories', subCategoriesRouter);
-app.use('/categories', categoriesRouter);
+router.use('/subCategories', subCategoriesRouter);
+router.use('/categories', categoriesRouter);
 
 // service
-app.use('/services', servicesRouter);
-app.use('/upgrades', upgradesRouter);
+router.use('/services', servicesRouter);
+router.use('/upgrades', upgradesRouter);
 
 // reviews
-app.use('/reviews', reviewsRouter);
+router.use('/reviews', reviewsRouter);
 
 export default router;
