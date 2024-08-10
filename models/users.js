@@ -31,7 +31,7 @@ const usersSchema = new mongoose.Schema(
       required: true,
     },
     password: {
-      type: password,
+      type: String,
       validate: {
         validator: function (v) {
           return validator.isStrongPassword(v);
