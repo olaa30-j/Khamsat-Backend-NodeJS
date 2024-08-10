@@ -1,5 +1,6 @@
 import express from 'express';
 import { createCategory, deleteCategory, getCategories, updateCategory } from '../controller/categories.js';
+import { checkRoles, verfiyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -10,9 +11,9 @@ router.get('/', getCategories);
 router.post('/', createCategory);
 
 // Update a category
-router.patch('/:categoryId', updateCategory);
+router.patch('/:categoryId', verfiyToken, checkRoles('admin'), updateCategory);
 
 // Delete a category
-router.delete('/category/:categoryId', deleteCategory);
+router.delete('/category/:categoryId', verfiyToken, checkRoles('admin'), deleteCategory);
 
 export default router;

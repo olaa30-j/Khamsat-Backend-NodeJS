@@ -13,7 +13,8 @@ import subCategoriesRouter from './subCategories.js';
 import categoriesRouter from './categories.js';
 import servicesRouter from './service.js';
 import reviewsRouter from './reviews.js';
-import upgradesRouter from './upgrade.js'
+import upgradesRouter from './upgrade.js';
+import adminRouter from './admin.js';
 
 router.use("/collections", collections);
 router.use("/carts", verfiyToken, checkRoles("user"), carts);
@@ -35,4 +36,6 @@ router.use('/upgrades', upgradesRouter);
 // reviews
 router.use('/reviews', reviewsRouter);
 
+// admin
+router.use('/admin', adminRouter);
 export default router;

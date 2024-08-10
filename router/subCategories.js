@@ -9,11 +9,12 @@ import {
     updateSubcategories,
     updateSubcategoryById
 } from "../controller/subCategories.js";
+import { verfiyToken, checkRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Create a subcategories
-router.post('/', createSubcategories);
+router.post('/', verfiyToken, checkRoles('admin'), createSubcategories);
 
 // Get all subcategories
 router.get('/:categoryId', getAllSubcategories);
@@ -25,15 +26,15 @@ router.get('/subcategories/:subcategoriesId', getSubcategoriesById);
 router.get('/subcategory/:subcategoriesId/:subcategoryId', getSubcategoryById);
 
 // Update a subcategory
-router.patch('/:subcategoryId', updateSubcategories);
+router.patch('/:subcategoryId', verfiyToken, checkRoles('admin'), updateSubcategories);
 
 // Update a subcategory
-router.patch('/subcategory/:subcategoriesId/:subcategoryId', updateSubcategoryById);
+router.patch('/subcategory/:subcategoriesId/:subcategoryId', verfiyToken, checkRoles('admin'), updateSubcategoryById);
 
 // Delete a subcategories
-router.delete('/:subcategoryId', deleteSubcategories);
+router.delete('/:subcategoryId', verfiyToken, checkRoles('admin'), deleteSubcategories);
 
 // Delete a subcategories
-router.delete('/subcategory/:subcategoriesId/:subcategoryId', deleteSubcategory);
+router.delete('/subcategory/:subcategoriesId/:subcategoryId', verfiyToken, checkRoles('admin'),deleteSubcategory);
 
 export default router;
