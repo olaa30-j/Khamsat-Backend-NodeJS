@@ -4,7 +4,7 @@ import Review from "../models/reviews.js";
 // Create Review
 export const createReview = async (req, res) => {
     const { userId } = req.params;
-    const {
+    let {
         qualityOfService,
         communication,
         deliveryPunctuality,
@@ -19,12 +19,11 @@ export const createReview = async (req, res) => {
     }
 
     try {
-        let totalRating;
-        if (qualityOfService >= 0 && communication >= 0 && deliveryPunctuality >= 0) {
-            totalRating = (qualityOfService + communication + deliveryPunctuality) / 2;
-        } else {
-            totalRating = (qualityOfService || 0 + communication || 0 + deliveryPunctuality || 0) / 2;
-        }
+        qualityOfService = qualityOfService || 0 ;
+        communication = communication  || 0 ;
+        deliveryPunctuality = deliveryPunctuality  || 0 ;
+
+        const totalRating = (qualityOfService + communication + deliveryPunctuality) / 3;
         
         const newReview = await Review.create({
             userId,
@@ -130,15 +129,18 @@ export const updateReview = async (req, res) => {
     } = req.body;
 
     try {
-        let totalRating;
-        if (qualityOfService >= 0 && communication >= 0 && deliveryPunctuality >= 0) {
-            totalRating = (qualityOfService + communication + deliveryPunctuality) / 2;
-        } else {
-            totalRating = (qualityOfService || 0 + communication || 0 + deliveryPunctuality || 0) / 2;
-        }
-        
         const review = await Review.findById(reviewId);
-        
+
+        if (!review) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+
+        const newQualityOfService = qualityOfService !== undefined ? qualityOfService : review.qualityOfService;
+        const newCommunication = communication !== undefined ? communication : review.communication;
+        const newDeliveryPunctuality = deliveryPunctuality !== undefined ? deliveryPunctuality : review.deliveryPunctuality;
+
+        const totalRating = (newQualityOfService + newCommunication + newDeliveryPunctuality) / 3;
+
         if (!review) {
             return res.status(404).json({ message: "Review not found" });
         }
@@ -148,9 +150,9 @@ export const updateReview = async (req, res) => {
                 { _id: reviewId },
                 {
                     $set: {
-                        qualityOfService: qualityOfService || review.qualityOfService,
-                        communication: communication || review.communication,
-                        deliveryPunctuality: deliveryPunctuality || review.deliveryPunctuality,
+                        qualityOfService: newQualityOfService,
+                        communication: newCommunication,
+                        deliveryPunctuality: newDeliveryPunctuality,
                         overallRating: totalRating,
                         reviewText: reviewText,
                     }
