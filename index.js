@@ -10,7 +10,7 @@ app.use(express.json());
 import notificationRoutes from './routes/notificatRoute.js';
 
 app.use('/notification',notificationRoutes);
-
+app.use()
 
 
 mongoose.connect(process.env.MONGO_URL).then(()=>{
