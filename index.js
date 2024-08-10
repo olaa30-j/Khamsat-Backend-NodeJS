@@ -10,6 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use('/static', express.static('static'));
 app.use(router)
 
 // mongodb setup 
