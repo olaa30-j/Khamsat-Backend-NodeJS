@@ -1,65 +1,53 @@
-import { Schema, model } from 'mongoose';
+import mongoose,{Schema,model} from "mongoose";
 
-let messageSchema = Schema({
-    content : {
-        type : String,
-        required : true,
-        minLength : 5,
-        maxLength : 100
+let messageSchema = new Schema(
+  {
+    content: {
+      type: String,
+      required: true,
+      minLength: 5,
+      maxLength: 100,
     },
 
-    archived : {
-        type : Boolean,
+    archived: {
+      type: Boolean,
+      default: false,
     },
 
-    attachments : {
-        type : Array,
-        required : false
+    attachments: {
+      type: Array,
+      required: false,
     },
 
     status: {
-        type: String, 
-        enum: ["sent", "delivered", "read"],
+      type: String,
+      enum: ["sent", "delivered", "read"],
+      default: "sent",
     },
 
-    // sender_id :{
+    sender_id: {
+      type: mongoose.Schema.ObjectId,
+    },
 
-    // },
-
-
-
-    // receiver_id :{
-
-    // }
-
+    receiver_id: {
+      type: mongoose.Schema.ObjectId,
+    },
 
     createdAt: {
-        type: Date,
-        default: Date.now
-    }},
+      type: Date,
+      default: Date.now,
+    },
+  },
 
-    {
-        timestamp : true
-     }
+  {
+    timestamp: true,
+  }
+);
 
-)
-
-messageSchema.pre('save',function(next){
-    this.createdAt = Date.now();
-    next();
+messageSchema.pre("save", function (next) {
+  this.createdAt = Date.now();
+  next();
 });
 
-let messageModel = model("Message",messageSchema);
+let messageModel = model("Message", messageSchema);
 export default messageModel;
-
-
-
-
-
-
-
-
-
-
-
-
