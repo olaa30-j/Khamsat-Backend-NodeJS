@@ -1,7 +1,7 @@
 import{Router} from 'express';
 let router = Router();
 
-import {createNotification,getAllNotifications,getNotificationById,editNotificationById,deleteNotificationById} from '../controllers/notificatCont.js';
+import {createNotification,getAllNotifications,getNotificationById,editNotificationById,deleteNotificationById} from '../controller/notifications.js';
 
 router.post('/',createNotification);
 

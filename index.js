@@ -11,8 +11,6 @@ app.use(cors());
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(router)
-import messageRoutes from "./routes/messageRoute.js"
-app.use('/message',messageRoutes);
 
 // mongodb setup 
 connectDB();
