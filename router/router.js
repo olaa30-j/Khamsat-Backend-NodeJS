@@ -14,6 +14,11 @@ import categoriesRouter from './categories.js';
 import servicesRouter from './service.js';
 import reviewsRouter from './reviews.js';
 import upgradesRouter from './upgrade.js'
+import swaggerUi from 'swagger-ui-express'
+import swaggerDocument from './../swagger.json'  with {type: "json"};
+
+router.use('/api-docs', swaggerUi.serve);
+router.get('/api-docs', swaggerUi.setup(swaggerDocument));
 
 router.use("/collections", collections);
 router.use("/carts", verfiyToken, checkRoles("user"), carts);
