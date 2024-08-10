@@ -1,14 +1,15 @@
-const multer = require('multer');
-const path = require('path');
+import multer, { diskStorage } from 'multer';
+import { join } from 'path';
 
 // ------------------------------------------------------------------------------------------------------- //
 // configurage storge
-let storage = multer.diskStorage({
+let storage = diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'images'))
+        cb(null, join(__dirname, 'static/images'))
     },
     filename: (req, file, cb) => { 
         cb(null, file.originalname)
+        req.body.profile_picture_url = `static/images/${file.originalname}`
     },
     fileFilter: (req, file, cb) =>{
         if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg'){
@@ -22,4 +23,4 @@ let storage = multer.diskStorage({
 
 let upload = multer({storage:storage});
 
-module.exports = upload;
+export default upload;

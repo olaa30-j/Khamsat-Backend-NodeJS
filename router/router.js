@@ -15,14 +15,19 @@ import servicesRouter from './service.js';
 import reviewsRouter from './reviews.js';
 import upgradesRouter from './upgrade.js';
 import adminRouter from './admin.js';
+import swaggerUi from 'swagger-ui-express'
+import swaggerDocument from './../swagger.json'  with {type: "json"};
 
-router.use("/collections", collections);
+router.use('/api-docs', swaggerUi.serve);
+router.get('/api-docs', swaggerUi.setup(swaggerDocument));
+
+router.use("/collections", verfiyToken, collections);
 router.use("/carts", verfiyToken, checkRoles("user"), carts);
 router.use("/posts", posts);
-router.use("/orders", orders);
+router.use("/orders", verfiyToken, orders);
 router.use("/users", users);
-router.use("/notification", notifications);
-router.use("/message", messages);
+router.use("/notification", verfiyToken, notifications);
+router.use("/message", verfiyToken, messages);
 
 
 // categories
