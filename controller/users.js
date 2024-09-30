@@ -3,11 +3,11 @@ import jwt from "jsonwebtoken";
 import users from "../models/users.js";
 
 export const login = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
   try {
-    const user = await users.findOne({ username });
+    const user = await users.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid username or password" });
+      return res.status(400).json({ message: "Invalid email or password" });
     }
     const isVerified = await bcrypt.compare(password, user.password);
     if (!isVerified) {
@@ -15,7 +15,7 @@ export const login = async (req, res) => {
     }
     const payload = {
       user_id: user._id,
-      username: user.username,
+      email: user.email,
       role: "user"
     };
     const token = jwt.sign(payload, process.env.SECRET_KEY);
@@ -27,10 +27,8 @@ export const login = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const user = await users.create({ ...req.body, password: hashedPassword });
+    req.body.email = {email: req.body.email, isVerified: false}
+    const user = await users.create({ ...req.body });
     res.status(200).json({ message: "Success", data: { user } });
   } catch (error) {
     res.status(500).json({ message: "Fail", error: error.message });
