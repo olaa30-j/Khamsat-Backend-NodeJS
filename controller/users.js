@@ -48,6 +48,20 @@ export const get = async (req, res) => {
   }
 };
 
+export const getProfile = async (req, res) => {
+  const id = req.user.user_id;
+  
+  try {
+    const user = await users.findById(id, "-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ message: "Fail", error: error.message });
+  }
+};
+
 export const getِAll = async (req, res) => {
   try {
     const result = await users.find({}, "-password -financial_info -payment_methods");
