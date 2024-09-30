@@ -1,5 +1,5 @@
 import categories from '../models/categories.js';
-import SubCategories from '../models/SubCategories.js';
+import SubCategories from '../models/subCategories.js';
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// // 
 // Get a category

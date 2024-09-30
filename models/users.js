@@ -23,7 +23,6 @@ const usersSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
     },
     account_type: {
       type: String,
@@ -43,8 +42,26 @@ const usersSchema = new mongoose.Schema(
       required: true,
     },
 
-    first_name: String,
-    last_name: String,
+    first_name: {
+      ar: {
+        type: String,
+        required: true,
+      },
+      en: {
+        type: String,
+        required: true,
+      },
+    },
+    last_name: {
+      ar: {
+        type: String,
+        required: true,
+      },
+      en: {
+        type: String,
+        required: true,
+      },
+    },
     profile_picture_url: String,
     country: String,
     city: String,
@@ -60,8 +77,8 @@ const usersSchema = new mongoose.Schema(
     financial_info: {
       total_balance: Number,
       pending_balance: Number,
-      withdrawable_earnings: Number, 
-    }
+      withdrawable_earnings: Number,
+    },
   },
   { timestamps: true }
 );
