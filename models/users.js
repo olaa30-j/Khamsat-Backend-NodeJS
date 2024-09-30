@@ -23,7 +23,7 @@ const usersSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
+      unique: true
     },
     account_type: {
       type: String,
