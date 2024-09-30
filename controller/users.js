@@ -38,7 +38,7 @@ export const create = async (req, res) => {
 export const get = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await users.findById(id);
+    const user = await users.findById(id, "-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -50,7 +50,7 @@ export const get = async (req, res) => {
 
 export const getِAll = async (req, res) => {
   try {
-    const result = await users.find();
+    const result = await users.find({}, "-password -financial_info -payment_methods");
     if (!result) {
       return res.status(404).send({ message: "No users were found" });
     }
