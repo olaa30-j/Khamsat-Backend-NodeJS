@@ -5,7 +5,7 @@ import { checkRoles, verfiyToken } from '../middleware/auth.js';
 const router = express.Router();
 
 // create review
-router.post('/:userId',  verfiyToken, checkRoles('seller', 'buyer'), createReview);
+router.post('/:userId', createReview);
 
 // update review
 router.patch('/:userId/:reviewId',  verfiyToken, checkRoles('seller', 'buyer'), updateReview);

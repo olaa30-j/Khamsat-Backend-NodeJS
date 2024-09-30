@@ -19,6 +19,7 @@ const emailSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 const usersSchema = new mongoose.Schema(
   {
     username: {

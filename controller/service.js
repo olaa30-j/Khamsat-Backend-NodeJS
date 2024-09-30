@@ -4,6 +4,7 @@ import UpgradeService from "../models/upgradeService.js";
 // create service
 export const createService = async (req, res) => {
     const { userId } =  req.params;
+    
     const {
         title,
         description,
@@ -11,11 +12,15 @@ export const createService = async (req, res) => {
         subcategoryId,
         price,
         images,
-        keyword,
+        keywords,
         deliveryTime
     } = req.body;
 
     try {
+        if(!categoryId, !subcategoryId){
+            return res.status(400).json({ message: "Category and Subcategory are required" });
+        }
+
         const newService = new Service({
             userId,
             title,
@@ -24,7 +29,7 @@ export const createService = async (req, res) => {
             subcategory: subcategoryId,
             price,
             images,
-            keyword,
+            keywords,
             deliveryTime
         });
 

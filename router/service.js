@@ -5,7 +5,7 @@ import { checkRoles, verfiyToken } from '../middleware/auth.js';
 const router = express.Router();
 
 // create service
-router.post('/:userId', verfiyToken, checkRoles('admin' , 'seller') , createService);
+router.post('/:userId', createService);
 
 // create service
 router.get('/', getAllServices);

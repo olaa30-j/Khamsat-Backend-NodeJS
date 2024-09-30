@@ -1,4 +1,28 @@
 import Review from "../models/reviews.js";
+import Service from "../models/service.js";
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////// //
+// Update Service
+export const UpdateService = async (serviceId) => {
+    try {
+        const service = await Service.findById(serviceId);
+        if (!service) {
+            throw new Error('Service not found');
+        }
+
+        const serviceReviews = await Review.find({ serviceId });
+        service.serviceCard.totalReviewers = serviceReviews.length;
+        service.serviceCard.totalRated = serviceReviews.length > 0
+            ? serviceReviews.reduce((acc, current) => acc + (current.overallRating || 0), 0) / serviceReviews.length
+            : 0;
+
+        await service.save();
+    } catch (err) {
+        console.error('Error updating service:', err);
+        throw err;
+    }
+};
+
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////// //
 // Create Review
@@ -37,6 +61,7 @@ export const createReview = async (req, res) => {
             replies: replies || []
         });
 
+        await UpdateService(serviceId);
         return res.status(201).json({ message: "Review created successfully", newReview });
     } catch (err) {
         console.error('Error creating review:', err);
@@ -164,6 +189,7 @@ export const updateReview = async (req, res) => {
                 return res.status(404).json({ message: "Review not found" });
             }    
 
+            await UpdateService(review.serviceId);
             res.status(200).json({ message: "Review updated successfully", updatedReview });
         }
 
@@ -183,6 +209,7 @@ export const deleteReview = async (req, res) => {
             return res.status(404).json({ message: "Review not found" });
         }
 
+        await UpdateService(reviewDeleted.serviceId);
         res.status(200).json({ message: "Review deleted successfully", reviewDeleted });
     } catch (err) {
         res.status(500).json({ message: "Server failed to deleted review" });

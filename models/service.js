@@ -81,7 +81,7 @@ const serviceSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      default: "5",
+      default: 5,
       required: true,
     },
     images: {
