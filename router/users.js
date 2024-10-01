@@ -9,6 +9,6 @@ router.get("/profile", verfiyToken,  getProfile)
 router.get("/:id", get)
 router.get("/", getِAll)
 router.post("/", create)
-router.patch("/:id", upload.single("avatar") ,update)
-router.delete("/:id", del)
+router.patch("/:id", verfiyToken, upload.single("avatar") ,update)
+router.delete("/:id", verfiyToken, del)
 export default router

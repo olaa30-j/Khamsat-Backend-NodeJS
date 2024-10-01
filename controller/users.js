@@ -14,7 +14,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
     const payload = {
-      user_id: user._id,
+      id: user._id,
       email: user.email,
       role: "user"
     };
@@ -49,7 +49,7 @@ export const get = async (req, res) => {
 };
 
 export const getProfile = async (req, res) => {
-  const id = req.user.user_id;
+  const id = req.user.id;
   
   try {
     const user = await users.findById(id, "-password");
