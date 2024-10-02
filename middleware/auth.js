@@ -8,12 +8,16 @@ export const verfiyToken = async (req, res, next) =>{
     if(!token){
         return res.status(401).send({message: 'Access denied. No token provided.'});
     }
+    try {
+        let decoded = await util.promisify(jwt.verify)(token, process.env.SECRET_KEY);
+    
+        req.user = decoded
+    
+        next();
 
-    let decoded = await util.promisify(jwt.verify)(token, process.env.SECRET_KEY);
-
-    req.user = decoded
-
-    next();
+    } catch (error) {
+        return res.status(401).send({ message: 'Access denied. Invalid token' });
+    }
 }
 
 export const checkRoles = (...roles) => {
