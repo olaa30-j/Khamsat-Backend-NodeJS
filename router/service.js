@@ -5,18 +5,18 @@ import { checkRoles, verfiyToken } from '../middleware/auth.js';
 const router = express.Router();
 
 // create service
-router.post('/:userId', createService);
+router.post('/', verfiyToken, checkRoles("seller"), createService);
 
 // create service
 router.get('/', getAllServices);
 
 // create service
-router.get('/service/:serviceId', getServiceById);
+router.get('/:serviceId', getServiceById);
 
 // update service
 router.patch('/:serviceId', verfiyToken, checkRoles('admin' ,'seller'), updateService);
 
 // delete service
-router.delete('/:serviceId', verfiyToken, checkRoles('seller'), deleteService);
+router.delete('/:serviceId', verfiyToken, checkRoles('admin','seller'), deleteService);
 
 export default router;

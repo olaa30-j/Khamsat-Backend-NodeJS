@@ -16,7 +16,7 @@ export const login = async (req, res) => {
     const payload = {
       id: user._id,
       email: user.email,
-      role: "user"
+      role: user.account_type
     };
     const token = jwt.sign(payload, process.env.SECRET_KEY);
     res.status(200).json({ message: "Success", data: { token } });
