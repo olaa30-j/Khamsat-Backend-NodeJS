@@ -2,23 +2,6 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import validator from "validator";
 
-const emailSchema = new mongoose.Schema(
-  {
-    email: {
-      type: String,
-      validate: {
-        validator: function (v) {
-          return validator.isEmail(v);
-        },
-      },
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  { timestamps: true }
-);
 
 const usersSchema = new mongoose.Schema(
   {
@@ -39,8 +22,17 @@ const usersSchema = new mongoose.Schema(
       },
     },
     email: {
-      type: emailSchema,
-      required: true,
+      type: String,
+      unique: true,
+      validate: {
+        validator: function (v) {
+          return validator.isEmail(v);
+        },
+      },
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
     },
 
     first_name: {
