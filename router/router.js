@@ -31,7 +31,7 @@ router.use("/message", verfiyToken, messages);
 
 
 // categories
-router.use('/subCategories', subCategoriesRouter);
+router.use('/subcategories', subCategoriesRouter);
 router.use('/categories', categoriesRouter);
 
 // service

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
-const SubcategorySchema = new mongoose.Schema({
-  name: {
+const NestedSubcategorySchema = new mongoose.Schema({
+  title: {
     ar: {
       type: String,
       required: true,
@@ -14,7 +14,7 @@ const SubcategorySchema = new mongoose.Schema({
 });
 
 const SubCategoriesSchema = new mongoose.Schema({
-  category: {
+  category_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Categories",
     required: true,
@@ -30,7 +30,7 @@ const SubCategoriesSchema = new mongoose.Schema({
     },
   },
   subcategories: {
-    type: [SubcategorySchema],
+    type: [NestedSubcategorySchema],
     required: true,
   },
 });
