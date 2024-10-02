@@ -3,7 +3,7 @@ import UpgradeService from "../models/upgradeService.js";
 
 // create service
 export const createService = async (req, res) => {
-    const { userId } =  req.params;
+    const userId =  req.user.id;
     
     const {
         title,
@@ -44,12 +44,21 @@ export const createService = async (req, res) => {
 // get all services
 export const getAllServices = async (req, res) => {
     try {
-        const services = await Service.find().select('-userId');
+        const query = queryBuilder(req.query)
+        const services = await Service.find(query).select('-userId');
 
         res.status(200).json({ services });
     }catch(err){
         res.status(500).json({ message: "Server failed to get services" });
     }
+}
+
+const queryBuilder = (filters) => {
+    const query = {}
+    if (filters.category) query.category = filters.category
+    if (filters.subcategory) query.subcategory = filters.subcategory
+    if (filters.rating)  query['serviceCard.totalRated'] = { "$gte": filters.rating }
+    return query
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// //
