@@ -1,5 +1,6 @@
 import Service from "../models/service.js";
 import UpgradeService from "../models/upgradeService.js";
+import users from "../models/users.js";
 
 // create service
 export const createService = async (req, res) => {
@@ -44,9 +45,24 @@ export const createService = async (req, res) => {
 // get all services
 export const getAllServices = async (req, res) => {
     try {
-        const services = await Service.find().select('-userId');
+        const services = await Service.find()
+        // .populate('category', 'name')
+        // .populate('subcategory', 'name')
 
-        res.status(200).json({ services });
+        const result = await Promise.all(
+            services.map(async (service) => {
+                const user = await users.findById(service.userId).select('profile_picture_url');
+                
+                const serviceData = { ...service._doc };
+                delete serviceData.userId;  
+                return {
+                    ...serviceData,  
+                    authorImg: user?.profile_picture_url || ''  
+                };
+            })
+        );
+
+        res.status(200).json({ services: result});
     }catch(err){
         res.status(500).json({ message: "Server failed to get services" });
     }
