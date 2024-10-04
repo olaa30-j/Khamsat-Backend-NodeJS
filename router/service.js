@@ -1,22 +1,25 @@
 import express from 'express'
-import { createService, deleteService, getAllServices, getServiceById, updateService } from '../controller/service.js';
+import { createService, deleteService, filterServices, getAllServices, getServiceById, updateService } from '../controller/service.js';
 import { checkRoles, verfiyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // create service
-router.post('/:userId', createService);
+router.post('/', verfiyToken, checkRoles("seller"), createService);
 
-// create service
+// Get services
 router.get('/', getAllServices);
 
-// create service
-router.get('/service/:serviceId', getServiceById);
+//filter services
+router.get('/filter', filterServices);
+
+// Get service
+router.get('/:serviceId', getServiceById);
 
 // update service
 router.patch('/:serviceId', verfiyToken, checkRoles('admin' ,'seller'), updateService);
 
 // delete service
-router.delete('/:serviceId', verfiyToken, checkRoles('seller'), deleteService);
+router.delete('/:serviceId', verfiyToken, checkRoles('admin','seller'), deleteService);
 
 export default router;

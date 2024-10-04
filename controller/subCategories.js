@@ -22,10 +22,10 @@ export const createSubcategories = async (req, res) => {
         }
 
         const newSubCategories = new SubCategories({
-            category: category._id,
+            category_id,
             title,
             subcategories: subcategories.map(sub => ({
-                name: sub.name
+                title: sub.title
             }))
         });
 
@@ -38,22 +38,7 @@ export const createSubcategories = async (req, res) => {
     }
 };
 
-// //////////////////////////////////////////////////////////////////////////////////////////////////// //
-// Get all subcategories
-export const getAllSubcategories = async (req, res) => {
-    try {
-        const { categoryId } = req.params
-        const category = await categories.findById(categoryId);
-        if (!category) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
 
-        const allSubcategories = await SubCategories.find({ category: categoryId });
-        res.status(200).json({ subcategoryTitle: allSubcategories });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// //
 // Get subcategories by id
@@ -106,7 +91,7 @@ export const updateSubcategories = async (req, res) => {
         }
 
         if (subcategories) {
-            updatedData.$push = { subcategories: subcategories.map(subcategory => ({ name: subcategory.name })) }
+            updatedData.$push = { subcategories: subcategories.map(subcategory => ({ title: subcategory.title })) }
         }
 
         const updatedSubcategory = await SubCategories.findByIdAndUpdate(
@@ -125,14 +110,14 @@ export const updateSubcategories = async (req, res) => {
 // Update a subcategory
 export const updateSubcategoryById = async (req, res) => {
     const { subcategoryId, subcategoriesId } = req.params;
-    const { name } = req.body;
+    const { title } = req.body;
 
     try {
         const updatedSubcategory = await SubCategories.findOneAndUpdate(
             { _id: subcategoriesId, 'subcategories._id': subcategoryId },
             {
                 $set: {
-                    'subcategories.$.name': name
+                    'subcategories.$.title': title
                 }
             },
             { new: true }

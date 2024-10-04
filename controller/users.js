@@ -5,7 +5,7 @@ import users from "../models/users.js";
 export const login = async (req, res) => {
   const { email, password } = req.body;  
   try {
-    const user = await users.findOne({ "email.email": email });
+    const user = await users.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -14,9 +14,9 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
     const payload = {
-      user_id: user._id,
+      id: user._id,
       email: user.email,
-      role: "user"
+      role: user.account_type
     };
     const token = jwt.sign(payload, process.env.SECRET_KEY);
     res.status(200).json({ message: "Success", data: { token } });
@@ -27,7 +27,6 @@ export const login = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    req.body.email = {email: req.body.email, isVerified: false}
     const user = await users.create({ ...req.body });
     res.status(200).json({ message: "Success", data: { user } });
   } catch (error) {
@@ -49,7 +48,7 @@ export const get = async (req, res) => {
 };
 
 export const getProfile = async (req, res) => {
-  const id = req.user.user_id;
+  const id = req.user.id;
   
   try {
     const user = await users.findById(id, "-password");

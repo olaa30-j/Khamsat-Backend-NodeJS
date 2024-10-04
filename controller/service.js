@@ -1,10 +1,12 @@
 import Service from "../models/service.js";
 import UpgradeService from "../models/upgradeService.js";
 import users from "../models/users.js";
+import categoriesModel from '../models/categories.js';
+import SubCategories from '../models/subCategories.js';
 
 // create service
 export const createService = async (req, res) => {
-    const { userId } =  req.params;
+    const userId =  req.user.id;
     
     const {
         title,
@@ -42,19 +44,57 @@ export const createService = async (req, res) => {
 };
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// //
-// get all services
-export const getAllServices = async (req, res) => {
-    try {
-        const services = await Service.find()
-        // .populate('category', 'name')
-        // .populate('subcategory', 'name')
+// filter data 
+const createFilter = async (query) => {
+    const filter = {};
 
+    if (query.categoryName) {
+        const category = await categoriesModel.findOne({
+            $or: [
+                { 'name.ar': query.categoryName },
+                { 'name.en': query.categoryName }
+            ]
+        });
+        if (category) {
+            filter.category = category._id; 
+        }
+    }
+    
+    if (query.subcategoryName) {
+        const subcategory = await SubCategories.findOne({
+            $or: [
+                { 'title.ar': query.subcategoryName },
+                { 'title.en': query.subcategoryName }
+            ]
+        });
+        if (subcategory) {
+            filter.subcategory = subcategory._id; 
+        }
+    }
+
+    if (query.rating) {
+        filter.rating = { $gte: query.rating }; 
+    }
+
+    return filter;
+}
+
+export const filterServices = async(req, res) =>{
+    try {
+        const filter = await createFilter(req.query); 
+        console.log('Filter used for querying services:', filter);
+
+        const services = await Service.find(filter)
+        .populate('category', 'name')
+        .populate('subcategory', 'title')
+
+        
         const result = await Promise.all(
             services.map(async (service) => {
                 const user = await users.findById(service.userId).select('profile_picture_url');
-                
                 const serviceData = { ...service._doc };
                 delete serviceData.userId;  
+
                 return {
                     ...serviceData,  
                     authorImg: user?.profile_picture_url || ''  
@@ -62,7 +102,21 @@ export const getAllServices = async (req, res) => {
             })
         );
 
-        res.status(200).json({ services: result});
+        res.status(200).json(result);
+    }catch(err){
+        res.status(500).json({ message: "Server failed to filter services" });
+    }
+}
+
+// /////////////////////////////////////////////////////////////////////////////////////////////////// //
+// get all services
+export const getAllServices = async (req, res) => {
+    try {
+        const services = await Service.find()
+        .populate('category', 'name')
+        .populate('subcategory', 'title')
+
+        res.status(200).json({ services });
     }catch(err){
         res.status(500).json({ message: "Server failed to get services" });
     }
