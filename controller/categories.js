@@ -3,9 +3,22 @@ import SubCategories from '../models/subCategories.js';
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// // 
 // Get a categories
+
+const createQuery = (queryPrams)=> {
+    let query = {}
+    if (queryPrams.categoryName) {
+        query['$or'] = [
+                { 'name.ar': queryPrams.categoryName },
+                { 'name.en': queryPrams.categoryName }
+        ]
+    }     
+    return query
+}
 export const getCategories = async (req, res) => {
+    
     try{
-        const categories = await categoriesModel.find();
+        const query = createQuery(req.query)        
+        const categories = await categoriesModel.find(query);
         res.status(200).json({message: 'Get all categories successfully', categories})
     }catch(error){
         res.status(500).json({message: error.message})
