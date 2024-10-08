@@ -43,7 +43,7 @@ export const getAllServiceUpgrades = async (req, res) => {
     const { serviceId } = req.params;
 
     try {
-        const upgrades = await UpgradeService.find({ serviceId: serviceId }).select('-serviceId');
+        const upgrades = await UpgradeService.find({ serviceId: serviceId })
         if (!upgrades) {
             return res.status(404).json({ message: "No upgrades found" });
         }

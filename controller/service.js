@@ -1,23 +1,24 @@
 import Service from "../models/service.js";
 import UpgradeService from "../models/upgradeService.js";
-import users from "../models/users.js";
 import categoriesModel from '../models/categories.js';
 import SubCategories from '../models/subCategories.js';
 
 // create service
 export const createService = async (req, res) => {
-    const userId = req.user.id;
-
     const {
+        userId,
         title,
         description,
+        BuyerRules,
         categoryId,
         subcategoryId,
         price,
-        images,
         keywords,
         deliveryTime
     } = req.body;
+
+    const singleFile = req.files.singleFile ? req.files.singleFile[0].path : null; 
+    const files = req.files.files ? req.files.files.map(file => file.path) : []; 
 
     try {
         if (!categoryId, !subcategoryId) {
@@ -30,8 +31,9 @@ export const createService = async (req, res) => {
             description,
             category: categoryId,
             subcategory: subcategoryId,
+            BuyerRules: BuyerRules,
             price,
-            images,
+            images: [singleFile, ...files],
             keywords,
             deliveryTime
         });
@@ -95,22 +97,9 @@ export const filterServices = async (req, res) => {
         const services = await Service.find(filter)
             .populate('category', 'name')
             .populate('subcategory', 'title')
+            .populate('userId', ['profilePicture', '-_id'])
 
-
-        const result = await Promise.all(
-            services.map(async (service) => {
-                const user = await users.findById(service.userId).select('profile_picture_url');
-                const serviceData = { ...service._doc };
-                delete serviceData.userId;
-
-                return {
-                    ...serviceData,
-                    authorImg: user?.profile_picture_url || ''
-                };
-            })
-        );
-
-        res.status(200).json(result);
+        res.status(200).json(services);
     } catch (err) {
         res.status(500).json({ message: "Server failed to filter services" });
     }
@@ -131,12 +120,37 @@ export const getAllServices = async (req, res) => {
     }
 }
 
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////// //
+// get user services 
+export const getUserServices = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const service = await Service.find(userId)
+                        .populate('category', 'name')
+                        .populate('subcategory', 'title')
+                        .populate('userId', ['profilePicture', 'username', '-_id'])
+
+        if (!service) {
+            return res.status(404).json({ message: "Service not found" });
+        }
+
+        res.status(200).json({ service });
+    } catch (err) {
+        res.status(500).json({ message: "Server failed in service" });
+    }
+}
+
 // //////////////////////////////////////////////////////////////////////////////////////////////////// //
 // get service by id
 export const getServiceById = async (req, res) => {
     const { serviceId } = req.params;
     try {
-        const service = await Service.findById(serviceId);
+        const service = await Service.findById(serviceId)
+                        .populate('category', 'name')
+                        .populate('subcategory', 'title')
+                        .populate('userId', ['profilePicture', 'username', '-_id'])
+
         if (!service) {
             return res.status(404).json({ message: "Service not found" });
         }

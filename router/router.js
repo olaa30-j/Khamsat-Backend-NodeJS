@@ -24,7 +24,7 @@ router.get('/api-docs', swaggerUi.setup(swaggerDocument));
 router.use("/collections", verfiyToken, collections);
 router.use("/carts", verfiyToken, checkRoles("user"), carts);
 router.use("/posts", posts);
-router.use("/orders", verfiyToken, orders);
+router.use("/orders", orders);
 router.use("/users", users);
 router.use("/notification", verfiyToken, notifications);
 router.use("/message", verfiyToken, messages);

@@ -36,8 +36,8 @@ export const getAllSubcategories = async (req, res) => {
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        const allSubcategories = await SubCategories.find({ category_id: categoryId });
-        res.status(200).json({ subcategoryTitle: allSubcategories });
+        const subcategories = await SubCategories.find({ category_id: categoryId });
+        res.status(200).json({ subcategories });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

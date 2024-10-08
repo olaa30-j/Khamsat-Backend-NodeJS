@@ -23,51 +23,26 @@ export const UpdateService = async (serviceId) => {
     }
 };
 
-
 // //////////////////////////////////////////////////////////////////////////////////////////////////////// //
-// Create Review
-export const createReview = async (req, res) => {
-    const { userId } = req.params;
-    let {
-        qualityOfService,
-        communication,
-        deliveryPunctuality,
-        reviewText,
-        serviceId,
-        orderId,
-        replies
-    } = req.body;
-
-    if (!reviewText || !userId || !serviceId || !orderId) {
-        return res.status(400).json({ message: "Missing required fields." });
-    }
+// Get Reviews
+export const getReviews = async (req, res) => {
+    const { serviceId } = req.params;
 
     try {
-        qualityOfService = qualityOfService || 0 ;
-        communication = communication  || 0 ;
-        deliveryPunctuality = deliveryPunctuality  || 0 ;
+        const service = await Service.findById(serviceId);
+        if (!service) {
+            return res.status(404).json({ message: 'Service not found' });
+        }
 
-        const totalRating = (qualityOfService + communication + deliveryPunctuality) / 3;
-        
-        const newReview = await Review.create({
-            userId,
-            serviceId,
-            orderId,
-            qualityOfService: qualityOfService,
-            communication: communication,
-            deliveryPunctuality: deliveryPunctuality,
-            overallRating: totalRating,
-            reviewText,
-            replies: replies || []
-        });
+        const serviceReviews = await Review.find({ serviceId }).select('-userId -orderId');
 
-        await UpdateService(serviceId);
-        return res.status(201).json({ message: "Review created successfully", newReview });
+        res.status(200).json({ message: "All Reviews found successfully", serviceReviews });
     } catch (err) {
-        console.error('Error creating review:', err);
-        return res.status(500).json({ message: "Server failed to create review" });
+        console.error('Error retrieving reviews:', err);
+        res.status(500).json({ message: 'An error occurred while retrieving reviews', error: err.message });
     }
 };
+
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////// //
 // Create Reply
@@ -98,6 +73,63 @@ export const createReplies = async (req, res) => {
     } catch (err) {
         console.error('Error creating reply:', err);
         return res.status(500).json({ message: "Server failed to create reply" });
+    }
+};
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////////// //
+// Create Review
+export const createReview = async (req, res) => {
+
+    const {
+        userId,
+        qualityOfService,
+        communication,
+        deliveryPunctuality,
+        reviewText,
+        serviceId,
+        orderId
+    } = req.body;
+
+    if (!reviewText || !serviceId || !orderId) {
+        return res.status(400).json({ message: "Missing required fields." });
+    }
+
+    try {
+        const qService = qualityOfService != null ? Number(qualityOfService) : 0;
+        const comm = communication != null ? Number(communication) : 0;
+        const delPunct = deliveryPunctuality != null ? Number(deliveryPunctuality) : 0;
+
+        if (
+            qService < 0 || qService > 5 ||
+            comm < 0 || comm > 5 ||
+            delPunct < 0 || delPunct > 5
+        ) {
+            return res.status(400).json({ message: "Ratings must be between 0 and 5." });
+        }
+
+        const totalRating = (qService + comm + delPunct) / 3;
+        
+        const newReview = await Review.create({
+            userId,
+            serviceId,
+            orderId,
+            qualityOfService: qService,
+            communication: comm,
+            deliveryPunctuality: delPunct,
+            overallRating: totalRating,
+            reviewText,
+            // Removed 'replies' to prevent external manipulation
+        });
+
+        // Ensure UpdateService is defined and properly imported
+        if (typeof UpdateService === 'function') {
+            await UpdateService(serviceId);
+        }
+
+        return res.status(201).json({ message: "Review created successfully", newReview });
+    } catch (err) {
+        console.error('Error creating review:', err);
+        return res.status(500).json({ message: "Server failed to create review" });
     }
 };
 

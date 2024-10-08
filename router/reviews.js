@@ -1,11 +1,14 @@
 import express from 'express'
-import { createReplies, createReview, deleteReply, deleteReview, updateReplies, updateReview } from '../controller/reviews.js';
+import { createReplies, createReview, deleteReply, deleteReview, getReviews, updateReplies, updateReview } from '../controller/reviews.js';
 import { checkRoles, verfiyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// get reviews
+router.post('/', getReviews);
+
 // create review
-router.post('/:userId', createReview);
+router.post('/', createReview);
 
 // update review
 router.patch('/:userId/:reviewId',  verfiyToken, checkRoles('seller', 'buyer'), updateReview);

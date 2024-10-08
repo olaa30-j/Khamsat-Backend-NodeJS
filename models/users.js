@@ -5,7 +5,7 @@ import validator from "validator";
 
 const usersSchema = new mongoose.Schema(
   {
-    username: {
+    username:{
       type: String,
     },
     account_type: {
@@ -55,7 +55,11 @@ const usersSchema = new mongoose.Schema(
         required: true,
       },
     },
-    profile_picture_url: String,
+    profilePicture: {
+      type: String,
+      required: true,
+      default: ''
+    },
     country: String,
     city: String,
     gender: {
