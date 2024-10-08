@@ -6,10 +6,12 @@
       "use": "@vercel/node"
     }
   ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "index.js" }
+  ],
   "headers": [
     {
-      "src": "/(.*)",
-      "dest": "index.js",
+      "source": "/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "*" },
