@@ -18,7 +18,7 @@ router.get('/filter', filterServices);
 router.get('/:serviceId', getServiceById);
 
 // Get service
-router.get('/:userId', getUserServices);
+router.get('/userservices/:userId', getUserServices);
 
 // update service
 router.patch('/:serviceId', verfiyToken, checkRoles('admin' ,'seller'), updateService);

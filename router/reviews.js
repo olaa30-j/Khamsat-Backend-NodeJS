@@ -5,7 +5,7 @@ import { checkRoles, verfiyToken } from '../middleware/auth.js';
 const router = express.Router();
 
 // get reviews
-router.post('/', getReviews);
+router.get('/', getReviews);
 
 // create review
 router.post('/', createReview);

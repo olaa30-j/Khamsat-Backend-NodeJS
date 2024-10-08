@@ -126,7 +126,7 @@ export const getAllServices = async (req, res) => {
 export const getUserServices = async (req, res) => {
     const { userId } = req.params;
     try {
-        const service = await Service.find(userId)
+        const service = await Service.find({userId:userId})
                         .populate('category', 'name')
                         .populate('subcategory', 'title')
                         .populate('userId', ['profilePicture', 'username', '-_id'])

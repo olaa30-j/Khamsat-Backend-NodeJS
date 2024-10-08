@@ -10,19 +10,19 @@ export const UpdateService = async (serviceId) => {
             throw new Error('Service not found');
         }
 
-        const serviceReviews = await Review.find({ serviceId });
+        const serviceReviews = await Review.find({serviceId:serviceId});
         service.serviceCard.totalReviewers = serviceReviews.length;
         service.serviceCard.totalRated = serviceReviews.length > 0
             ? serviceReviews.reduce((acc, current) => acc + (current.overallRating || 0), 0) / serviceReviews.length
             : 0;
 
+        console.log(service.serviceCard);
         await service.save();
     } catch (err) {
         console.error('Error updating service:', err);
         throw err;
     }
 };
-
 // //////////////////////////////////////////////////////////////////////////////////////////////////////// //
 // Get Reviews
 export const getReviews = async (req, res) => {
@@ -31,7 +31,7 @@ export const getReviews = async (req, res) => {
     try {
         const service = await Service.findById(serviceId);
         if (!service) {
-            return res.status(404).json({ message: 'Service not found' });
+            return res.status(404).json({ message: 'No Service found' });
         }
 
         const serviceReviews = await Review.find({ serviceId }).select('-userId -orderId');
@@ -118,12 +118,14 @@ export const createReview = async (req, res) => {
             deliveryPunctuality: delPunct,
             overallRating: totalRating,
             reviewText,
-            // Removed 'replies' to prevent external manipulation
         });
 
         // Ensure UpdateService is defined and properly imported
-        if (typeof UpdateService === 'function') {
+        try {
             await UpdateService(serviceId);
+        } catch (updateError) {
+            console.error('Error updating service:', updateError);
+            return res.status(500).json({ message: "Review created, but service update failed." });
         }
 
         return res.status(201).json({ message: "Review created successfully", newReview });
