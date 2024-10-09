@@ -5,7 +5,7 @@ import { checkRoles, verfiyToken } from '../middleware/auth.js';
 const router = express.Router();
 
 // get reviews
-router.get('/', getReviews);
+router.get('/:serviceId', getReviews);
 
 // create review
 router.post('/', createReview);
@@ -18,7 +18,7 @@ router.delete('/:userId/:reviewId',  verfiyToken, checkRoles('seller', 'buyer'),
 
 // ////////////////////////////////////////////// //
 // create reply
-router.patch('/reply/:userId/:reviewId',  verfiyToken, checkRoles('seller', 'buyer'), createReplies);
+router.patch('/reply/:userId/:reviewId', createReplies);
 
 // update reply
 router.patch('/reply/update/:userId/:reviewId',  verfiyToken, checkRoles('seller', 'buyer'), updateReplies);

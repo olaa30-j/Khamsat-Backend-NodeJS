@@ -34,7 +34,13 @@ export const getReviews = async (req, res) => {
             return res.status(404).json({ message: 'No Service found' });
         }
 
-        const serviceReviews = await Review.find({ serviceId }).select('-userId -orderId');
+        const serviceReviews = await Review.find({ serviceId })
+        .populate('userId', ['profilePicture', 'username', '-_id'])
+        .populate({
+            path: 'replies.userId',
+            select: ['profilePicture', 'username', '-_id']
+        })
+        .select('-orderId'); 
 
         res.status(200).json({ message: "All Reviews found successfully", serviceReviews });
     } catch (err) {
