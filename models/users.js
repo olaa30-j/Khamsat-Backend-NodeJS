@@ -11,7 +11,6 @@ const usersSchema = new mongoose.Schema(
     account_type: {
       type: String,
       enum: ["seller", "buyer"],
-      required: true,
     },
     password: {
       type: String,
@@ -57,8 +56,7 @@ const usersSchema = new mongoose.Schema(
     },
     profilePicture: {
       type: String,
-      required: true,
-      default: ''
+      default: 'public/assets/defaultProfile.png'
     },
     country: String,
     city: String,
