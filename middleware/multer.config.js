@@ -1,6 +1,6 @@
 import multer, { diskStorage } from 'multer';
-import { join } from 'path';
-
+import { join, dirname } from 'path';
+const __dirname = dirname("");
 // Configure storage
 const storage = diskStorage({
     destination: (req, file, cb) => {
@@ -10,7 +10,7 @@ const storage = diskStorage({
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const filename = `${uniqueSuffix}-${file.originalname}`;
         cb(null, filename);
-        req.body.profilePicture = `public/assets${filename}`; 
+        req.body.profilePicture = `public/assets/${filename}`; 
     }
 });
 
