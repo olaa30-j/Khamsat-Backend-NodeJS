@@ -1,6 +1,5 @@
 import multer, { diskStorage } from 'multer';
-import { join, dirname } from 'path';
-const __dirname = dirname("");
+import { join } from 'path';
 // Configure storage
 const storage = diskStorage({
     destination: (req, file, cb) => {
