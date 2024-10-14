@@ -26,6 +26,25 @@ export const getCategories = async (req, res) => {
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// // 
+// Get all category categories with all subcategories
+export const getCategoriesWithSubcategories = async (req, res) => {
+    try{
+        const categories = await categoriesModel.aggregate([
+            {
+                $lookup: {
+                    from: 'subcategories', 
+                    localField: '_id', 
+                    foreignField: 'category_id', 
+                    as: 'subcategories'
+                  }
+            }
+        ]);
+        res.status(200).json({message: 'Get all categories successfully', categories})
+    }catch(error){
+        res.status(500).json({message: error.message})
+    }
+}
+// //////////////////////////////////////////////////////////////////////////////////////////////////// // 
 // Get a category
 export const getCategory = async (req, res) => {
     const {categoryId} = req.params
@@ -74,11 +93,13 @@ export const updateCategory = async (req, res) => {
     try {
         const {categoryId} = req.params;
         const  {name}  = req.body;
+        const  {description}  = req.body;
         const updatedCategory = await categoriesModel.findByIdAndUpdate(
             categoryId,
             {
                 $set:{
-                    name
+                    name,
+                    description
                 }
             }, {new: true}
         );
