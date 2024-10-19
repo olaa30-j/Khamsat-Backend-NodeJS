@@ -6,7 +6,7 @@ import upload from '../middleware/multer.config.js';
 const router = express.Router();
 
 // create service
-router.post('/', upload.fields([{ name: 'singleFile', maxCount: 1 }, { name: 'files', maxCount: 5 }]), createService);
+router.post('/', upload.fields([{ name: 'images', maxCount: 7}]), createService);
 
 // Get services
 router.get('/', getAllServices);

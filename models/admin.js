@@ -1,29 +1,12 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-
 const adminSchema = new mongoose.Schema({
-  first_name: {
-    ar: {
-      type: String,
-    },
-    en: {
-      type: String,
-    },
-  },
-  last_name: {
-    ar: {
-      type: String,
-    },
-    en: {
-      type: String,
-    },
-  },
   profile_picture_url: String,
-  username: {
+  userName: {
     type: String,
-    min: (4, "minimum 4 characters"),
-    max: (10, "maximum 10 characters"),
+    minlength: [4, 'minimum 4 characters'], 
+    maxlength: [10, 'maximum 10 characters'],
     required: true,
     unique: true,
   },
@@ -36,26 +19,26 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    default: "admin"
+  }
 });
 
-adminSchema.pre("save", function (next) {
+// Pre-save hook to hash the password before saving
+adminSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    let admin = this;
-    bcrypt
-      .genSalt(10)
-      .then((salt) => {
-        bcrypt.hash(admin.password, salt).then((hash) => {
-          admin.password = hash;
-          next();
-        });
-      })
-      .catch(() => {
-        throw new Error("Cannot create/update admin");
-      });
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+      next();
+    } catch (err) {
+      next(new Error("Cannot create/update admin"));
+    }
   } else {
     next();
   }
 });
 
-const AdminSchema = mongoose.model("Admin", adminSchema);
-export default AdminSchema;
+const Admin = mongoose.model("Admin", adminSchema);
+export default Admin;

@@ -1,18 +1,20 @@
 import multer, { diskStorage } from 'multer';
-import { join, dirname } from 'path';
-const __dirname = dirname("");
+import path from 'path';
+
 // Configure storage
 const storage = diskStorage({
     destination: (req, file, cb) => {
-        cb(null, join(__dirname, 'public/assets'));
+        cb(null, path.join('public', 'assets')); 
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const filename = `${uniqueSuffix}-${file.originalname}`;
+        const filename = `${uniqueSuffix}-${file.originalname}`; 
         cb(null, filename);
-        req.body.profilePicture = `public/assets/${filename}`; 
+        req.body.profilePicture = `/public/assets/${filename}`;
     }
 });
+
+
 
 // Set up multer with storage and file filter
 const upload = multer({
@@ -21,7 +23,7 @@ const upload = multer({
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png|gif/;
         const mimetype = filetypes.test(file.mimetype);
-        const extname = filetypes.test(join(__dirname, file.originalname).toLowerCase());
+        const extname = filetypes.test(path.join(file.originalname));
 
         if (mimetype && extname) {
             cb(null, true);

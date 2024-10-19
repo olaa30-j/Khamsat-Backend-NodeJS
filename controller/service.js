@@ -17,9 +17,8 @@ export const createService = async (req, res) => {
         deliveryTime
     } = req.body;
 
-    const singleFile = req.files.singleFile ? req.files.singleFile[0].path : null; 
-    const files = req.files.files ? req.files.files.map(file => file.path) : []; 
-
+    const images = req.files.images ? req.files.images.map(file => file.path.replace(/\\/g, '/')) : []; 
+    
     try {
         if (!categoryId, !subcategoryId) {
             return res.status(400).json({ message: "Category and Subcategory are required" });
@@ -33,7 +32,7 @@ export const createService = async (req, res) => {
             subcategory: subcategoryId,
             BuyerRules: BuyerRules,
             price,
-            images: [singleFile, ...files],
+            images: [...images],
             keywords,
             deliveryTime
         });
