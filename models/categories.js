@@ -11,6 +11,14 @@ const categoriesSchema = new mongoose.Schema({
       required: true,
     },
   },
+  description: {
+    ar: {
+      type: String
+    },
+    en: {
+      type: String
+    }
+  }
 });
 
 const categories = mongoose.model("Categories", categoriesSchema);
