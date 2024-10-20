@@ -58,15 +58,13 @@ export const loginAdmin = async (req, res) => {
     );
 
     res.cookie('authToken', token, {
-      httpOnly: true, 
+      httpOnly: false, 
       secure: process.env.NODE_ENV === 'production',
       maxAge: 3600000, 
-      sameSite: 'None' 
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
     });
-
-    console.log('Login successful, authToken cookie set.');
     
-    res.status(200).json({ message: "Login successful" });
+    res.status(200).json({ message: "Login successful"});
   } catch (err) {
     console.error('Error logging in admin:', err.message);
     res.status(500).json({ message: err.message });
