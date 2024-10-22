@@ -6,19 +6,24 @@ const ordersSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
     },
-    item: {
-      service_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Services",
-      },
-      quantity: Number,
-      upgrades: [
-        {
+    items: [
+      {
+        service_id: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Upgrades",
+          ref: "Services",
         },
-      ],
-    },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        upgrades: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Upgrades",
+          },
+        ],
+      },
+    ],
     status: {
       type: String,
       enum: [
@@ -28,15 +33,20 @@ const ordersSchema = new mongoose.Schema(
         "Delivered",
         "Canceled",
       ],
+      required: true,
+      default:"Awaiting Confirmation"
     },
     order_number: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
-    total: Number,
+    total: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-const orders = mongoose.model("Orders", ordersSchema);
-export default orders;
+const Orders = mongoose.model("Orders", ordersSchema);
+export default Orders;

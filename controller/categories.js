@@ -3,15 +3,47 @@ import SubCategories from '../models/subCategories.js';
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// // 
 // Get a categories
+
+const createQuery = (queryPrams)=> {
+    let query = {}
+    if (queryPrams.categoryName) {
+        query['$or'] = [
+                { 'name.ar': queryPrams.categoryName },
+                { 'name.en': queryPrams.categoryName }
+        ]
+    }     
+    return query
+}
 export const getCategories = async (req, res) => {
+    
     try{
-        const categories = await categoriesModel.find();
+        const query = createQuery(req.query)        
+        const categories = await categoriesModel.find(query);
         res.status(200).json({message: 'Get all categories successfully', categories})
     }catch(error){
         res.status(500).json({message: error.message})
     }
 }
 
+// //////////////////////////////////////////////////////////////////////////////////////////////////// // 
+// Get all category categories with all subcategories
+export const getCategoriesWithSubcategories = async (req, res) => {
+    try{
+        const categories = await categoriesModel.aggregate([
+            {
+                $lookup: {
+                    from: 'subcategories', 
+                    localField: '_id', 
+                    foreignField: 'category_id', 
+                    as: 'subcategories'
+                  }
+            }
+        ]);
+        res.status(200).json({message: 'Get all categories successfully', categories})
+    }catch(error){
+        res.status(500).json({message: error.message})
+    }
+}
 // //////////////////////////////////////////////////////////////////////////////////////////////////// // 
 // Get a category
 export const getCategory = async (req, res) => {
@@ -36,8 +68,8 @@ export const getAllSubcategories = async (req, res) => {
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        const allSubcategories = await SubCategories.find({ category_id: categoryId });
-        res.status(200).json({ subcategoryTitle: allSubcategories });
+        const subcategories = await SubCategories.find({ category_id: categoryId });
+        res.status(200).json({ subcategories });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -61,11 +93,13 @@ export const updateCategory = async (req, res) => {
     try {
         const {categoryId} = req.params;
         const  {name}  = req.body;
+        const  {description}  = req.body;
         const updatedCategory = await categoriesModel.findByIdAndUpdate(
             categoryId,
             {
                 $set:{
-                    name
+                    name,
+                    description
                 }
             }, {new: true}
         );

@@ -5,15 +5,40 @@ import jwt from "jsonwebtoken";
 // //////////////////////////////////////////////////////////////////////////////////////// //
 // Create an Admin
 export const createAdmin = async (req, res) => {
-  try {
-    const admin = await Admin.create(req.body);
+  const {
+    userName,
+    email,
+    password,
+  } = req.body;
 
-    res.status(201).json({ message: "Admin created successfully", admin });
+  if (!userName || !email || !password) {
+    return res.status(400).json({ message: 'All fields (userName, email, password) are required' });
+  }
+
+  try {
+    const existingAdmin = await Admin.findOne({ $or: [{ userName }, { email }] });
+    if (existingAdmin) {
+      return res.status(400).json({ message: 'userName or email already exists' });
+    }
+
+    let image = '';
+    if (req.file) {
+      image = req.file.path.replace(/\\/g, '/'); 
+    }
+  
+    await Admin.create({
+      userName,
+      email,
+      password,
+      profile_picture_url: image
+    });
+
+    res.status(201).json({ message: 'Admin created successfully' });
+
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
-
 // //////////////////////////////////////////////////////////////////////////////////////// //
 // Login Admin
 export const loginAdmin = async (req, res) => {
@@ -27,15 +52,25 @@ export const loginAdmin = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
 
     const token = jwt.sign(
-      { id: admin._id, role: "admin", email: admin.email },
+      { role: admin.role, email: admin.email, userName: admin.userName },
       process.env.SECRET_KEY,
       { expiresIn: "1h" }
     );
-    res.status(200).json({ token });
+
+    res.cookie('authToken', token, {
+      httpOnly: false, 
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 3600000, 
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
+    });
+    
+    res.status(200).json({ message: "Login successful"});
   } catch (err) {
+    console.error('Error logging in admin:', err.message);
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // //////////////////////////////////////////////////////////////////////////////////////// //
 // Find an Admin by ID

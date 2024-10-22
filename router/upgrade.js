@@ -11,7 +11,7 @@ import { checkRoles, verfiyToken } from '../middleware/auth.js';
 const router = express.Router();
 
 // create upgrade
-router.post('/', verfiyToken, checkRoles('seller'), createUpgradeService);
+router.post('/', createUpgradeService);
 
 // create upgrade
 router.get('/:serviceId', getAllServiceUpgrades);

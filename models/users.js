@@ -5,13 +5,12 @@ import validator from "validator";
 
 const usersSchema = new mongoose.Schema(
   {
-    username: {
+    username:{
       type: String,
     },
     account_type: {
       type: String,
       enum: ["seller", "buyer"],
-      required: true,
     },
     password: {
       type: String,
@@ -55,7 +54,10 @@ const usersSchema = new mongoose.Schema(
         required: true,
       },
     },
-    profile_picture_url: String,
+    profilePicture: {
+      type: String,
+      default: 'public/assets/defaultProfile.png'
+    },
     country: String,
     city: String,
     gender: {

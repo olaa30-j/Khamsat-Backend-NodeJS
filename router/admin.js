@@ -7,11 +7,13 @@ import {
     deleteAdmin,
     getProfile
 } from '../controller/admin.js'; 
-import { checkRoles, verfiyToken } from '../middleware/auth.js';
+import { authenticateUser, checkRoles, verfiyToken } from '../middleware/auth.js';
+import upload from '../middleware/multer.config.js';
+
 const router = express.Router();
 
 // Route to create an admin
-router.post('/', createAdmin);
+router.post('/', upload.single('image'),  createAdmin);
 
 // Route to log in an admin
 router.post('/login', loginAdmin);
