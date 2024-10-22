@@ -17,6 +17,7 @@ import upgradesRouter from './upgrade.js';
 import adminRouter from './admin.js';
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './../swagger.json'  with {type: "json"};
+import paymentRouter from './payment.js'
 
 router.use('/api-docs', swaggerUi.serve);
 router.get('/api-docs', swaggerUi.setup(swaggerDocument));
@@ -43,4 +44,7 @@ router.use('/reviews', reviewsRouter);
 
 // admin
 router.use('/admin', adminRouter);
+
+// payments
+router.use('/payment', verfiyToken, paymentRouter)
 export default router;
