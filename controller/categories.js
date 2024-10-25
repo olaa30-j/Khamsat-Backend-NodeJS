@@ -79,8 +79,8 @@ export const getAllSubcategories = async (req, res) => {
 // Create a category
 export const createCategory = async (req, res) => {
     try {
-        const { name } = req.body;
-        const category = await categoriesModel.create({ name });
+        const { name, description } = req.body;
+        const category = await categoriesModel.create({ name, description });
         res.status(201).json({ message: 'Category created successfully', category });
     } catch (error) {
         res.status(500).json({ message: error.message });
