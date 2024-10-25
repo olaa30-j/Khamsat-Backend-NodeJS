@@ -34,6 +34,7 @@ export const createService = async (req, res) => {
             price,
             images: [...images],
             keywords,
+            status: 'waiting',
             deliveryTime
         });
 
@@ -97,6 +98,7 @@ export const filterServices = async (req, res) => {
             .populate('category', 'name')
             .populate('subcategory', 'title')
             .populate('userId', ['profilePicture', '-_id'])
+            .select('-status')
 
         res.status(200).json(services);
     } catch (err) {
@@ -105,15 +107,30 @@ export const filterServices = async (req, res) => {
 }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////// //
-// get all services
-export const getAllServices = async (req, res) => {
+// get Users services
+export const getUsersServices = async (req, res) => {
     try {
-        const services = await Service.find()
+        const services = await Service.find({status: 'accepted'})
             .populate('category', 'name')
             .populate('subcategory', 'title')
             .select('-userId');
 
         res.status(200).json({ services });
+    } catch (err) {
+        res.status(500).json({ message: "Server failed to get services" });
+    }
+}
+
+// /////////////////////////////////////////////////////////////////////////////////////////////////// //
+// get all services
+export const getServices = async (req, res) => {
+    try {
+        const services = await Service.find()
+            .populate('category', 'name')
+            .populate('subcategory', 'title')
+            .populate('userId', ['profilePicture', 'username', '-_id'])
+
+        res.status(200).json(services);
     } catch (err) {
         res.status(500).json({ message: "Server failed to get services" });
     }
@@ -164,8 +181,9 @@ export const getServiceById = async (req, res) => {
 // update service
 export const updateService = async (req, res) => {
     const { serviceId } = req.params;
-    const serviceData = req.body;
+    const serviceData = { ...req.body };
 
+    delete serviceData.status;
     try {
         const updatedService = await Service.findByIdAndUpdate(
             serviceId,
@@ -176,6 +194,30 @@ export const updateService = async (req, res) => {
         res.status(200).json({ message: "Service updated successfully", updatedService });
     } catch (err) {
         res.status(500).json({ message: "Server failed to update service" });
+    }
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////// //
+// Update service status
+export const updateServiceStatus = async (req, res) => {
+    const { serviceId } = req.params;
+    const { status } = req.body; 
+
+    try {
+        const updatedService = await Service.findByIdAndUpdate(
+            serviceId,
+            { $set: { status } },
+            { new: true } 
+        );
+
+        if (!updatedService) {
+            return res.status(404).json({ message: "Service not found" });
+        }
+
+        res.status(200).json({ message: "Service status updated successfully", updatedService });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server failed to update service status" });
     }
 }
 

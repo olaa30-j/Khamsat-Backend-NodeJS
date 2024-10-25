@@ -52,7 +52,7 @@ export const loginAdmin = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
 
     const token = jwt.sign(
-      { role: admin.role, email: admin.email, userName: admin.userName },
+      { role: admin.role, email: admin.email, userName: admin.userName, profile_picture_url: admin.profile_picture_url },
       process.env.SECRET_KEY,
       { expiresIn: "1h" }
     );

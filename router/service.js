@@ -1,6 +1,6 @@
 import express from 'express'
-import { createService, deleteService, filterServices, getAllServices, getServiceById, getUserServices, updateService } from '../controller/service.js';
-import { checkRoles, verfiyToken } from '../middleware/auth.js';
+import { createService, deleteService, filterServices, getServiceById, getServices, getUserServices, getUsersServices, updateService, updateServiceStatus } from '../controller/service.js';
+import { authenticateUser, checkRoles, verfiyToken } from '../middleware/auth.js';
 import upload from '../middleware/multer.config.js';
 
 const router = express.Router();
@@ -8,8 +8,11 @@ const router = express.Router();
 // create service
 router.post('/', upload.fields([{ name: 'images', maxCount: 7}]), createService);
 
-// Get services
-router.get('/', getAllServices);
+// Get Users services
+router.get('/', getUsersServices);
+
+// Get All services
+router.get('/dashboard', authenticateUser, checkRoles('admin'),getServices);
 
 //filter services
 router.get('/filter', filterServices);
@@ -21,9 +24,12 @@ router.get('/:serviceId', getServiceById);
 router.get('/userservices/:userId', getUserServices);
 
 // update service
-router.patch('/:serviceId', verfiyToken, checkRoles('admin' ,'seller'), updateService);
+router.patch('/:serviceId', verfiyToken, checkRoles('seller'), updateService);
+
+// update service status
+router.patch('/dashboard/:serviceId', authenticateUser, checkRoles('admin'), updateServiceStatus);
 
 // delete service
-router.delete('/:serviceId', verfiyToken, checkRoles('admin','seller'), deleteService);
+router.delete('/:serviceId', deleteService);
 
 export default router;
