@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import users from "../models/users.js";
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;  
+  const { email, password } = req.body;
   try {
     const user = await users.findOne({ email });
     if (!user) {
@@ -16,13 +16,23 @@ export const login = async (req, res) => {
     const payload = {
       id: user._id,
       email: user.email,
-      role: user.account_type
+      role: user.account_type,
     };
     const token = jwt.sign(payload, process.env.SECRET_KEY);
+
+    res.cookie("authToken", token, {
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     res.status(200).json({ message: "Success", data: { token } });
-  } catch (error) {    
+  } catch (error) {
     res.status(500).json({ message: "Fail", error: error.message });
   }
+};
+
+export const logout = (req, res) => {
+  res.clearCookie("authToken");
+  res.status(200).json({ message: "Logged out successfully" });
 };
 
 export const create = async (req, res) => {
@@ -49,7 +59,7 @@ export const get = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   const id = req.user.id;
-  
+
   try {
     const user = await users.findById(id, "-password");
     if (!user) {
@@ -63,7 +73,10 @@ export const getProfile = async (req, res) => {
 
 export const getِAll = async (req, res) => {
   try {
-    const result = await users.find({}, "-password -financial_info -payment_methods");
+    const result = await users.find(
+      {},
+      "-password -financial_info -payment_methods"
+    );
     if (!result) {
       return res.status(404).send({ message: "No users were found" });
     }
