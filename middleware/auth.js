@@ -17,6 +17,9 @@ export const verfiyToken = async (req, res, next) =>{
     }
 }
 
+// --------------------------------------------------------------------------------------------------- // 
+// cookies authorization
+
 export const authenticateUser = (req, res, next) => {
     const token = req.cookies.authToken || req.headers['authorization']?.split(' ')[1];
 

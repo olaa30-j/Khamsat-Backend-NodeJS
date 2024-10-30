@@ -61,17 +61,21 @@ export const getProfile = async (req, res) => {
   }
 };
 
-export const getِAll = async (req, res) => {
+export const getAll = async (req, res) => {
   try {
-    const result = await users.find({}, "-password -financial_info -payment_methods");
-    if (!result) {
+    const result = await users.find().select("-password -payment_methods");
+    if (!result || result.length === 0) {
       return res.status(404).send({ message: "No users were found" });
     }
-    res.status(200).send({ data: result });
+    
+    console.log(result); 
+    res.status(200).send(result);
   } catch (error) {
-    res.status(500).send({ message: "Fail", error: error.message });
+    console.error("Error fetching users:", error); 
+    res.status(500).send({ message: "Failed to retrieve users", error: error.message });
   }
 };
+
 
 export const update = async (req, res) => {
   const { id } = req.params;
