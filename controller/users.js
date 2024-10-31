@@ -9,7 +9,7 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const isVerified = await bcrypt.compare(password, user.password);
+    const isVerified = bcrypt.compare(password, user.password);
     if (!isVerified) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -21,8 +21,11 @@ export const login = async (req, res) => {
     const token = jwt.sign(payload, process.env.SECRET_KEY);
 
     res.cookie("authToken", token, {
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+      maxAge: 24 * 60 * 60 * 1000, 
+      httpOnly: true,               
+      secure: process.env.NODE_ENV === 'production', 
+      path: '/',                    
+  });
 
     res.status(200).json({ message: "Success", data: { token } });
   } catch (error) {
@@ -35,14 +38,38 @@ export const logout = (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 };
 
+
 export const create = async (req, res) => {
+  const { email, password, ...otherFields } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
   try {
-    const user = await users.create({ ...req.body });
+    let user = await users.findOne({ email });
+    if (user) {
+      return res.status(409).json({ message: "User already exists" });
+    }
+
+    let image = 'https://res.cloudinary.com/demo/image/upload/c_scale,w_100/d_docs:placeholders:samples:avatar.png/non_existing_id.png';
+    if (req.file) {
+      image = req.file.path.replace(/\\/g, '/'); 
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user = await users.create({ email, password: hashedPassword, profilePicture:image, ...otherFields });
+
     res.status(200).json({ message: "Success", data: { user } });
   } catch (error) {
-    res.status(500).json({ message: "Fail", error: error.message });
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: "Validation failed", error: error.message });
+    }
+    res.status(500).json({ message: "An unexpected error occurred", error: error.message });
   }
 };
+
+
 
 export const get = async (req, res) => {
   const { id } = req.params;
