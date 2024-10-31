@@ -6,7 +6,6 @@ import SubCategories from '../models/subCategories.js';
 // create service
 export const createService = async (req, res) => {
     const userId = req.user.id;
-    console.log(userId);
     
     const {
         title,

@@ -18,7 +18,7 @@ router.post("/logout", logout);
 router.get("/profile", verfiyToken, getProfile);
 router.get("/:id", get);
 router.get("/", getAll);
-router.post("/", create);
+router.post("/", upload.single("profilePicture"), create);
 router.patch("/:id", verfiyToken, upload.single("avatar"), update);
 router.delete("/:id", verfiyToken, del);
 export default router;

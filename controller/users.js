@@ -9,7 +9,7 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const isVerified = bcrypt.compare(password, user.password);
+    const isVerified = await bcrypt.compare(password, user.password);
     if (!isVerified) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -41,6 +41,8 @@ export const logout = (req, res) => {
 
 export const create = async (req, res) => {
   const { email, password, ...otherFields } = req.body;
+  console.log(req);
+  
 
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
@@ -53,12 +55,12 @@ export const create = async (req, res) => {
     }
 
     let image = 'https://res.cloudinary.com/demo/image/upload/c_scale,w_100/d_docs:placeholders:samples:avatar.png/non_existing_id.png';
-    if (req.file) {
+    if (req.file && req.file.path) {
       image = req.file.path.replace(/\\/g, '/'); 
     }
-
+  
     const hashedPassword = await bcrypt.hash(password, 10);
-    user = await users.create({ email, password: hashedPassword, profilePicture:image, ...otherFields });
+    user = await users.create({ email, password: hashedPassword, profilePicture: image, ...otherFields });
 
     res.status(200).json({ message: "Success", data: { user } });
   } catch (error) {
