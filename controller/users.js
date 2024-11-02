@@ -9,7 +9,7 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const isVerified = await bcrypt.compare(password, user.password);
+    const isVerified = bcrypt.compare(password, user.password);
     if (!isVerified) {
       return res.status(400).json({ message: "Invalid email or password" });
     }

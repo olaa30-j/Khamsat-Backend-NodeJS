@@ -20,7 +20,7 @@ router.get('/filter', filterServices);
 // Get service
 router.get('/:serviceId', getServiceById);
 
-// Get service
+// Get Users services
 router.get('/userservices/:userId', getUserServices);
 
 // update service
