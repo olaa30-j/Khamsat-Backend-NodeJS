@@ -56,7 +56,7 @@ const usersSchema = new mongoose.Schema(
     },
     profilePicture: {
       type: String,
-      default: 'public/assets/defaultProfile.png'
+      required: true,
     },
     country: String,
     city: String,

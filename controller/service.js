@@ -5,8 +5,9 @@ import SubCategories from '../models/subCategories.js';
 
 // create service
 export const createService = async (req, res) => {
+    const userId = req.user.id;
+    
     const {
-        userId,
         title,
         description,
         BuyerRules,
@@ -17,10 +18,13 @@ export const createService = async (req, res) => {
         deliveryTime
     } = req.body;
 
-    const images = req.files.images ? req.files.images.map(file => file.path.replace(/\\/g, '/')) : []; 
-    
+    let imagesFiles = [];
+    if (req.files && req.files.images) {
+        imagesFiles = req.files.images.map(file => file.path.replace(/\\/g, '/'));
+    }
+
     try {
-        if (!categoryId, !subcategoryId) {
+        if (!categoryId || !subcategoryId) {
             return res.status(400).json({ message: "Category and Subcategory are required" });
         }
 
@@ -30,9 +34,9 @@ export const createService = async (req, res) => {
             description,
             category: categoryId,
             subcategory: subcategoryId,
-            BuyerRules: BuyerRules,
+            BuyerRules,
             price,
-            images: [...images],
+            images: imagesFiles,
             keywords,
             status: 'waiting',
             deliveryTime
@@ -41,9 +45,10 @@ export const createService = async (req, res) => {
         const savedService = await newService.save();
         res.status(201).json({ message: "Service created successfully", savedService });
     } catch (err) {
-        res.status(500).json({ message: "Server failed to create service" });
+        res.status(500).json({ message: "Server failed to create service", error: err.message });
     }
 };
+
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// //
 // filter data 
@@ -184,6 +189,14 @@ export const updateService = async (req, res) => {
     const serviceData = { ...req.body };
 
     delete serviceData.status;
+
+    let imagesFiles;
+    if (req.file) {
+        imagesFiles = req.file.path.map(file => file.path.replace(/\\/g, '/'))
+    }else{
+        imagesFiles = []
+    }
+
     try {
         const updatedService = await Service.findByIdAndUpdate(
             serviceId,
