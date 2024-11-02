@@ -47,7 +47,7 @@ const serviceSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
-      required: true,
+      required: true, 
     },
     title: {
       ar: {
@@ -104,6 +104,12 @@ const serviceSchema = new mongoose.Schema(
       type: serviceCardSchema,
       default: {},
     },
+    status: {
+      type: String,
+      enum: ['waiting', 'accepted', 'paused'],
+      default: 'waiting', 
+      required: true,
+    }
   },
   {
     timestamps: true,

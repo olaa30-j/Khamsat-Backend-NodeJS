@@ -21,7 +21,7 @@ export const createAdmin = async (req, res) => {
       return res.status(400).json({ message: 'userName or email already exists' });
     }
 
-    let image = '';
+    let image = 'https://res.cloudinary.com/demo/image/upload/c_scale,w_100/d_docs:placeholders:samples:avatar.png/non_existing_id.png';
     if (req.file) {
       image = req.file.path.replace(/\\/g, '/'); 
     }
@@ -39,6 +39,7 @@ export const createAdmin = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
 // //////////////////////////////////////////////////////////////////////////////////////// //
 // Login Admin
 export const loginAdmin = async (req, res) => {
@@ -52,7 +53,7 @@ export const loginAdmin = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
 
     const token = jwt.sign(
-      { role: admin.role, email: admin.email, userName: admin.userName },
+      { role: admin.role, email: admin.email, userName: admin.userName, profile_picture_url: admin.profile_picture_url },
       process.env.SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -106,8 +107,6 @@ export const getProfile = async (req, res) => {
 export const updateAdmin = async (req, res) => {
   const { id } = req.user;
   const updateData = req.body;
-
-  console.log(req.user, id);
 
   try {
     const admin = await Admin.findByIdAndUpdate(id, updateData, { new: true });

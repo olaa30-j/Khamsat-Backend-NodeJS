@@ -17,6 +17,9 @@ export const verfiyToken = async (req, res, next) =>{
     }
 }
 
+// --------------------------------------------------------------------------------------------------- // 
+// cookies authorization
+
 export const authenticateUser = (req, res, next) => {
     const token = req.cookies.authToken || req.headers['authorization']?.split(' ')[1];
 
@@ -29,7 +32,7 @@ export const authenticateUser = (req, res, next) => {
             return res.status(401).send({ message: 'Invalid token.' });
         }
 
-        req.user = decoded; // Set user data from token payload
+        req.user = decoded; 
         next();
     });
 };

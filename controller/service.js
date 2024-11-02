@@ -5,8 +5,9 @@ import SubCategories from '../models/subCategories.js';
 
 // create service
 export const createService = async (req, res) => {
+    const userId = req.user.id;
+    
     const {
-        userId,
         title,
         description,
         BuyerRules,
@@ -17,10 +18,13 @@ export const createService = async (req, res) => {
         deliveryTime
     } = req.body;
 
-    const images = req.files.images ? req.files.images.map(file => file.path.replace(/\\/g, '/')) : []; 
-    
+    let imagesFiles = [];
+    if (req.files && req.files.images) {
+        imagesFiles = req.files.images.map(file => file.path.replace(/\\/g, '/'));
+    }
+
     try {
-        if (!categoryId, !subcategoryId) {
+        if (!categoryId || !subcategoryId) {
             return res.status(400).json({ message: "Category and Subcategory are required" });
         }
 
@@ -30,19 +34,21 @@ export const createService = async (req, res) => {
             description,
             category: categoryId,
             subcategory: subcategoryId,
-            BuyerRules: BuyerRules,
+            BuyerRules,
             price,
-            images: [...images],
+            images: imagesFiles,
             keywords,
+            status: 'waiting',
             deliveryTime
         });
 
         const savedService = await newService.save();
         res.status(201).json({ message: "Service created successfully", savedService });
     } catch (err) {
-        res.status(500).json({ message: "Server failed to create service" });
+        res.status(500).json({ message: "Server failed to create service", error: err.message });
     }
 };
+
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// //
 // filter data 
@@ -97,6 +103,7 @@ export const filterServices = async (req, res) => {
             .populate('category', 'name')
             .populate('subcategory', 'title')
             .populate('userId', ['profilePicture', '-_id'])
+            .select('-status')
 
         res.status(200).json(services);
     } catch (err) {
@@ -105,15 +112,30 @@ export const filterServices = async (req, res) => {
 }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////// //
-// get all services
-export const getAllServices = async (req, res) => {
+// get Users services
+export const getUsersServices = async (req, res) => {
     try {
-        const services = await Service.find()
+        const services = await Service.find({status: 'accepted'})
             .populate('category', 'name')
             .populate('subcategory', 'title')
             .select('-userId');
 
         res.status(200).json({ services });
+    } catch (err) {
+        res.status(500).json({ message: "Server failed to get services" });
+    }
+}
+
+// /////////////////////////////////////////////////////////////////////////////////////////////////// //
+// get all services
+export const getServices = async (req, res) => {
+    try {
+        const services = await Service.find()
+            .populate('category', 'name')
+            .populate('subcategory', 'title')
+            .populate('userId', ['profilePicture', 'username', '-_id'])
+
+        res.status(200).json(services);
     } catch (err) {
         res.status(500).json({ message: "Server failed to get services" });
     }
@@ -164,7 +186,16 @@ export const getServiceById = async (req, res) => {
 // update service
 export const updateService = async (req, res) => {
     const { serviceId } = req.params;
-    const serviceData = req.body;
+    const serviceData = { ...req.body };
+
+    delete serviceData.status;
+
+    let imagesFiles;
+    if (req.file) {
+        imagesFiles = req.file.path.map(file => file.path.replace(/\\/g, '/'))
+    }else{
+        imagesFiles = []
+    }
 
     try {
         const updatedService = await Service.findByIdAndUpdate(
@@ -176,6 +207,30 @@ export const updateService = async (req, res) => {
         res.status(200).json({ message: "Service updated successfully", updatedService });
     } catch (err) {
         res.status(500).json({ message: "Server failed to update service" });
+    }
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////// //
+// Update service status
+export const updateServiceStatus = async (req, res) => {
+    const { serviceId } = req.params;
+    const { status } = req.body; 
+
+    try {
+        const updatedService = await Service.findByIdAndUpdate(
+            serviceId,
+            { $set: { status } },
+            { new: true } 
+        );
+
+        if (!updatedService) {
+            return res.status(404).json({ message: "Service not found" });
+        }
+
+        res.status(200).json({ message: "Service status updated successfully", updatedService });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server failed to update service status" });
     }
 }
 

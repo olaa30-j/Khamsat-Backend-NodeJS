@@ -2,7 +2,10 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const adminSchema = new mongoose.Schema({
-  profile_picture_url: String,
+  profile_picture_url: {
+    type: String,
+    required: true,
+  },
   userName: {
     type: String,
     minlength: [4, 'minimum 4 characters'], 

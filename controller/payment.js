@@ -1,10 +1,10 @@
 import Stripe from "stripe"
 import { createOrderAfterPayment } from "./orders.js";
 
-const {STRIPE_SECRET_KEY} = process.env
-if(!STRIPE_SECRET_KEY) throw new Error("Stripe secret key is not defined");
+const { STRIPE_SECRET_KEY } = process.env;
+if (!STRIPE_SECRET_KEY) throw new Error("Stripe secret key is not defined");
 
-const stripe = Stripe(STRIPE_SECRET_KEY)
+const stripe = Stripe(STRIPE_SECRET_KEY);
 
 export const createPaymentIntent = async (req, res) => {
     const {amount, order} = req.body
