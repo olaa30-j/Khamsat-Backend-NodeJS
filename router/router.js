@@ -46,5 +46,5 @@ router.use('/reviews', reviewsRouter);
 router.use('/admin', adminRouter);
 
 // payments
-router.use('/payment', verfiyToken, paymentRouter)
+router.use('/payment', paymentRouter)
 export default router;
