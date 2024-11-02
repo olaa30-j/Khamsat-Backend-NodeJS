@@ -30,18 +30,18 @@ export const getAll = async (req, res) => {
 // Create a new order
 export const create = async (req, res) => {
   // Destructure the request body
-  const { user_id, items, status, order_number, total } = req.body;
+  const { user_id, items, status, order_number } = req.body;
 
   // Basic validation for required fields
-  if (!user_id || !items || !status || !order_number || !total) {
+  if (!user_id || !items || !status || !order_number) {
     return res.status(400).json({
       success: false,
-      message: "Missing required fields: user_id, items, status, order_number, or total",
+      message: "Missing required fields: user_id, items, status, or order_number",
     });
   }
 
   try {
-    const order = await orders.create({ user_id, items, status, order_number, total });
+    const order = await orders.create({ user_id, items, status, order_number });
     res.status(201).json({ success: true, message: "Order created successfully", data: order });
   } catch (error) {
     res.status(400).json({
@@ -52,19 +52,35 @@ export const create = async (req, res) => {
   }
 };
 
-export const createOrderAfterPayment = async (order) => {
-  const { user_id, items, total } = order;
-  const order_number = Math.random() * 999999
-  if (!user_id || !items || !total) {
-    throw new Error("Missing required fields: user_id, items or total")
+export const createOrderAfterPayment = async (order, userId) => {
+  const { items } = order;
+  if (!items) {
+    throw new Error("Missing required field items")
+  }
+  const itemsArray = items.items
+  if (!itemsArray) {
+    throw new Error("Missing required field items")
+  }
+  try {
+    itemsArray.forEach(async (item) => {
+      let upgrades = []
+      item.upgrades.forEach(u => upgrades.push(u.upgradeId))
+      const newOrder = {
+        user_id: userId,
+        order_number: Math.random() * 99999999,
+        items: [{
+          service_id: item.serviceId,
+          quantity: item.quantity,
+          upgrades: upgrades
+        }]
+      }
+      await orders.create(newOrder)
+    })
+
+  } catch (error) {
+      throw new Error("Failed to create order")
   }
 
-  try {
-    const order = await orders.create({ user_id, items, order_number, total });
-    return { success: true, message: "Order created successfully", data: order }
-  } catch (error) {
-    throw new Error("Failed to create order")
-  }
 }
 
 export const update = async (req, res) => {

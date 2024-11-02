@@ -16,14 +16,37 @@ export const createPaymentIntent = async (req, res) => {
             currency: 'USD',
             automatic_payment_methods: {enabled: true},
             metadata: {
-                order
+                order,
+                userId: req.user.id
             }
         })
         return res.status(200).json({message: "Success", clientSecret: paymentIntent.client_secret})
     } catch(error) {
-        res.status(500).json({ message: "Server failed to create payment intent" });
+        res.status(500).json({ message: "Server failed to create payment intent", error: error.message });
     }
 }
+
+const handlePaymentIntentSucceeded = async (paymentIntent)=> {
+        const order = JSON.parse(paymentIntent.metadata.order)
+        const userId = paymentIntent.metadata.userId
+        console.log(order, userId);
+        await createOrderAfterPayment(order, userId)        
+}
+
+export const handleWebhook = async (req, res) => {
+    const event = req.body;
+
+    // Handle the event
+    switch (event.type) {
+        case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object;
+        handlePaymentIntentSucceeded(paymentIntent);
+        break;
+    }
+    res.status(200).json({message: 'Recieved'})
+}
+
+
 
 /* Paypal */
 const generateAccessToken = async () => {
@@ -53,11 +76,11 @@ const generateAccessToken = async () => {
  * Create an order to start the transaction.
  * @see https://developer.paypal.com/docs/api/orders/v2/#orders_create
  */
-const createOrder = async (cart) => {
+const createOrder = async (order) => {
   // use the cart information passed from the front-end to calculate the purchase unit details
   console.log(
     "shopping cart information passed from the frontend createOrder() callback:",
-    cart
+    order
   );
 
   const accessToken = await generateAccessToken();
@@ -68,7 +91,7 @@ const createOrder = async (cart) => {
       {
         amount: {
           currency_code: "USD",
-          value: "100.00",
+          value: order.amount,
         },
       },
     ],
@@ -87,7 +110,7 @@ const createOrder = async (cart) => {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  console.log(response)
+  console.log(response.status)
   return handleResponse(response);
 };
 
@@ -95,7 +118,7 @@ const createOrder = async (cart) => {
  * Capture payment for the created order to complete the transaction.
  * @see https://developer.paypal.com/docs/api/orders/v2/#orders_capture
  */
-const captureOrder = async (orderID) => {
+const captureOrder = async (orderID, order, userId) => {
   const accessToken = await generateAccessToken();
   const url = `${PAYPAL_API_URL}/v2/checkout/orders/${orderID}/capture`;
 
@@ -112,12 +135,20 @@ const captureOrder = async (orderID) => {
     },
   });
 
-  return handleResponse(response);
+  const { jsonResponse, httpStatusCode } = await handleResponse(response);
+
+  // Only store data if payment is successful
+  if (httpStatusCode === 201 && jsonResponse.status === "COMPLETED") {
+    createOrderAfterPayment(order, userId)
+  }
+
+  return { jsonResponse, httpStatusCode };
 };
 
 async function handleResponse(response) {
   try {
     const jsonResponse = await response.json();
+    console.log(JSON.stringify(jsonResponse))
     return {
       jsonResponse,
       httpStatusCode: response.status,
@@ -131,8 +162,8 @@ async function handleResponse(response) {
 export const handleCreateOrder = async (req, res) => {
   try {
     // use the cart information passed from the front-end to calculate the order amount detals
-    const { cart } = req.body;
-    const { jsonResponse, httpStatusCode } = await createOrder(cart);
+    const { order } = req.body;
+    const { jsonResponse, httpStatusCode } = await createOrder(order);
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
     console.error("Failed to create order:", error);
@@ -143,52 +174,12 @@ export const handleCreateOrder = async (req, res) => {
 export const handleCaptureOrder = async (req, res) => {
   try {
     const { orderID } = req.params;
-    const { jsonResponse, httpStatusCode } = await captureOrder(orderID);
+    const { order } = req.body;
+    const userId = req.user.id
+    const { jsonResponse, httpStatusCode } = await captureOrder(orderID, order, userId);
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
     console.error("Failed to create order:", error);
     res.status(500).json({ error: "Failed to capture order." });
   }
-}
-
-export const handleWebhook = async (req, res) => {
-    const event = req.body;
-
-    // Handle the event
-    switch (event.type) {
-        case 'payment_intent.succeeded':
-        const paymentIntent = event.data.object;
-        handlePaymentIntentSucceeded(paymentIntent);
-        break;
-    }
-    res.status(200).json({message: 'Recieved'})
-}
-
-const handlePaymentIntentSucceeded = async (paymentIntent)=> {
-    // const order: IOrder = { // !!! for testing. remove this and get data from cart
-    //     user_id: '66febc9bd66445b2cf6466a1',
-    //     items: [
-    //       {
-    //         service_id: '66fb0c9ec51b9b0c3abfcc9c',
-    //          quantity: 2,
-    //          price:5,
-    //          upgrades: [
-    //           {id: '1', price: 5}
-    //          ]
-    //         }
-    //     ],
-    //     amount: 50
-    // }
-        const order = JSON.parse(paymentIntent.metadata.order)
-        console.log(order);
-        for (let itemIndex in order.items) {
-            const newOrder = { 
-                user_id:order.userId, 
-                items: [{
-                    service_id: order.items[itemIndex].id, quantity: order.items[itemIndex].quantity,
-                    upgrades: order.items[itemIndex].upgrades.map(u=> u.id)
-                }], 
-                total: order.amount }
-            await createOrderAfterPayment(newOrder)        
-        }
 }

@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.post("/create-payment-intent", verfiyToken, createPaymentIntent)
 router.post("/webhook", handleWebhook)
-router.post("/create-paypal-order", handleCreateOrder)
-router.post("/order/:orderID/capture", handleCaptureOrder)
+router.post("/create-paypal-order", verfiyToken, handleCreateOrder)
+router.post("/order/:orderID/capture", verfiyToken, handleCaptureOrder)
 
 export default router
