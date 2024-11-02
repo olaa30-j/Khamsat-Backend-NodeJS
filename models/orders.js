@@ -10,7 +10,7 @@ const ordersSchema = new mongoose.Schema(
       {
         service_id: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Services",
+          ref: "Service",
         },
         quantity: {
           type: Number,
@@ -19,7 +19,7 @@ const ordersSchema = new mongoose.Schema(
         upgrades: [
           {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Upgrades",
+            ref: "upgradeService",
           },
         ],
       },
@@ -46,6 +46,40 @@ const ordersSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Middleware to calculate the total price before saving
+ordersSchema.pre("save", async function (next) {
+  try {
+    let total = 0;
+
+    // Loop through each item to calculate its total cost
+    for (const item of this.items) {
+      // Populate the service and upgrades to get prices
+      const service = await mongoose.model("Service").findById(item.service_id);
+      if (!service) continue
+      let itemTotal = service.price * item.quantity;
+
+      // Add upgrade prices if they exist
+      if (item.upgrades && item.upgrades.length > 0) {
+        const upgrades = await mongoose.model("upgradeService").find({
+          _id: { $in: item.upgrades },
+        });
+        
+        const upgradesTotal = upgrades.reduce((sum, upgrade) => sum + upgrade.price, 0);
+        itemTotal += upgradesTotal * item.quantity;
+      }
+
+      // Add to the order total
+      total += itemTotal;
+    }
+
+    // Set the calculated total on the order
+    this.total = total;
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 const Orders = mongoose.model("Orders", ordersSchema);
 export default Orders;

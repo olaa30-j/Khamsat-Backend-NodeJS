@@ -27,6 +27,28 @@ export const getAll = async (req, res) => {
   }
 };
 
+export const getOrdersByUser = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const result = await orders.find({user_id: userId})
+    .populate({
+      path: 'items.service_id',  
+      select: ['title', 'userId'],            
+      populate: {
+        path: 'userId',                       
+        select: ['first_name', 'last_name', 'profilePicture'],  
+      },
+    })
+    .exec();
+    if (!result.length) {
+      return res.status(404).json({ success: false, message: "No orders found" });
+    }
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error while retrieving orders", error: error.message });
+  }
+};
+
 // Create a new order
 export const create = async (req, res) => {
   // Destructure the request body
@@ -67,7 +89,7 @@ export const createOrderAfterPayment = async (order, userId) => {
       item.upgrades.forEach(u => upgrades.push(u.upgradeId))
       const newOrder = {
         user_id: userId,
-        order_number: Math.random() * 99999999,
+        order_number: Math.floor( Math.random() * 99999999 ),
         items: [{
           service_id: item.serviceId,
           quantity: item.quantity,
