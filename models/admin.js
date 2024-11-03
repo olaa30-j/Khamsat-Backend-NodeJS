@@ -5,13 +5,14 @@ const adminSchema = new mongoose.Schema({
   profile_picture_url: {
     type: String,
     required: true,
+    default: "https://res.cloudinary.com/demo/image/upload/c_scale,w_100/d_docs:placeholders:samples:avatar.png/non_existing_id.png",
   },
   userName: {
     type: String,
     minlength: [4, 'minimum 4 characters'], 
-    maxlength: [10, 'maximum 10 characters'],
+    maxlength: [20, 'maximum 20 characters'],
     required: true,
-    unique: true,
+    unique: true, 
   },
   email: {
     type: String,
@@ -28,20 +29,17 @@ const adminSchema = new mongoose.Schema({
   }
 });
 
-// Pre-save hook to hash the password before saving
 adminSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     try {
       const salt = await bcrypt.genSalt(10);
       this.password = await bcrypt.hash(this.password, salt);
-      next();
     } catch (err) {
-      next(new Error("Cannot create/update admin"));
+      return next(new Error("Cannot create/update admin"));
     }
-  } else {
-    next();
   }
+  next();
 });
 
-const Admin = mongoose.model("Admin", adminSchema);
+const Admin = mongoose.model("AdminDashboard", adminSchema);
 export default Admin;

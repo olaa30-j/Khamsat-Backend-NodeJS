@@ -5,27 +5,23 @@ import jwt from "jsonwebtoken";
 // //////////////////////////////////////////////////////////////////////////////////////// //
 // Create an Admin
 export const createAdmin = async (req, res) => {
-  const {
-    userName,
-    email,
-    password,
-  } = req.body;
-
+  const { userName, email, password } = req.body;
+  
   if (!userName || !email || !password) {
     return res.status(400).json({ message: 'All fields (userName, email, password) are required' });
   }
 
   try {
-    const existingAdmin = await Admin.findOne({ $or: [{ userName }, { email }] });
+    const existingAdmin = await Admin.findOne({email});
     if (existingAdmin) {
       return res.status(400).json({ message: 'userName or email already exists' });
     }
 
     let image = 'https://res.cloudinary.com/demo/image/upload/c_scale,w_100/d_docs:placeholders:samples:avatar.png/non_existing_id.png';
-    if (req.file) {
+    if (req.file && req.file.path) {
       image = req.file.path.replace(/\\/g, '/'); 
     }
-  
+
     await Admin.create({
       userName,
       email,
@@ -36,9 +32,15 @@ export const createAdmin = async (req, res) => {
     res.status(201).json({ message: 'Admin created successfully' });
 
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    if (err.code === 11000) {
+      const duplicateKey = Object.keys(err.keyValue)[0];
+      res.status(400).json({ message: `${duplicateKey} already exists` });
+    } else {
+      res.status(400).json({ message: err.message });
+    }
   }
 };
+
 
 // //////////////////////////////////////////////////////////////////////////////////////// //
 // Login Admin

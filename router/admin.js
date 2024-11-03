@@ -13,7 +13,7 @@ import upload from '../middleware/multer.config.js';
 const router = express.Router();
 
 // Route to create an admin
-router.post('/', authenticateUser, upload.single('profile_picture_url'),  createAdmin);
+router.post('/dashboard', authenticateUser, checkRoles('admin'), upload.single('profile_picture_url'),  createAdmin);
 
 // Route to log in an admin
 router.post('/login', loginAdmin);
