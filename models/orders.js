@@ -47,7 +47,7 @@ const ordersSchema = new mongoose.Schema(
           "Canceled",
         ],
         required: true,
-        default:"Awaiting Confirmation"
+        default:"Awaiting Instructions"
       }
     },
     order_number: {
