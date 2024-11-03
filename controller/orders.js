@@ -52,6 +52,21 @@ export const create = async (req, res) => {
   }
 };
 
+export const createOrderAfterPayment = async (order) => {
+  const { user_id, items, total } = order;
+  const order_number = Math.random() * 999999
+  if (!user_id || !items || !total) {
+    throw new Error("Missing required fields: user_id, items or total")
+  }
+
+  try {
+    const order = await orders.create({ user_id, items, order_number, total });
+    return { success: true, message: "Order created successfully", data: order }
+  } catch (error) {
+    throw new Error("Failed to create order")
+  }
+}
+
 export const update = async (req, res) => {
   const { id } = req.params;
 
