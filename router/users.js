@@ -8,9 +8,10 @@ import {
   del,
   getProfile,
   getAll,
+  updateEmailVerified,
 } from "../controller/users.js";
 import upload from "../middleware/multer.config.js";
-import { verfiyToken } from "../middleware/auth.js";
+import { authenticateUser, checkRoles, verfiyToken } from "../middleware/auth.js";
 const router = express.Router();
 
 router.post("/login", login);
@@ -20,5 +21,6 @@ router.get("/:id", get);
 router.get("/", getAll);
 router.post("/", upload.single("profilePicture"), create);
 router.patch("/:id", verfiyToken, upload.single("avatar"), update);
+router.patch("/dashboard/:id", authenticateUser,checkRoles("admin"), updateEmailVerified);
 router.delete("/:id", verfiyToken, del);
 export default router;

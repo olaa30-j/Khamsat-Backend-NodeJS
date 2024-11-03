@@ -104,7 +104,7 @@ export const getAll = async (req, res) => {
   try {
     const result = await users.find(
       {},
-      "-password -financial_info -payment_methods"
+      "-password -payment_methods"
     );
     if (!result) {
       return res.status(404).send({ message: "No users were found" });
@@ -144,3 +144,27 @@ export const del = async (req, res) => {
     res.status(500).json({ message: "Fail", error: error.message });
   }
 };
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////// //
+// Update User isEmailVerified
+export const updateEmailVerified = async (req, res) => {
+  const { id } = req.params;
+  const { isEmailVerified } = req.body; 
+
+  try {
+      const updatedVerified = await users.findByIdAndUpdate(
+          id,
+          { $set: { isEmailVerified } },
+          { new: true } 
+      );
+
+      if (!updatedVerified) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json({ message: "User isEmailVerified updated successfully", updatedVerified });
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server failed to update service User isEmailVerified" });
+  }
+}

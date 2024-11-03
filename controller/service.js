@@ -136,7 +136,7 @@ export const getServices = async (req, res) => {
         const services = await Service.find()
             .populate('category', 'name')
             .populate('subcategory', 'title')
-            .populate('userId', ['profilePicture', 'username', '-_id']);
+            .populate('userId', ['profilePicture', 'username']);
         res.status(200).json(services);
     } catch (err) {
         res.status(500).json({ message: "Server failed to get services" });
