@@ -115,7 +115,9 @@ export const filterServices = async (req, res) => {
 // get Users services
 export const getUsersServices = async (req, res) => {
     try {
-        const services = await Service.find({status: 'accepted'})
+        const filter = await createFilter(req.query);
+        filter.status = 'active'
+        const services = await Service.find(filter)
             .populate('category', 'name')
             .populate('subcategory', 'title')
             .select('-userId');
