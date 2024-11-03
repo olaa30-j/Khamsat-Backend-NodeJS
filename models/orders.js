@@ -25,16 +25,30 @@ const ordersSchema = new mongoose.Schema(
       },
     ],
     status: {
-      type: String,
-      enum: [
-        "Awaiting Instructions",
-        "In Progress",
-        "Awaiting Confirmation",
-        "Delivered",
-        "Canceled",
-      ],
-      required: true,
-      default:"Awaiting Confirmation"
+      ar: {
+          type: String,
+          enum: [
+            "بانتظار التعليمات",
+            "جاري تنفيذها",
+            "بانتظار الاستلام",
+            "تم تسليمها",
+            "ملغية",
+          ],
+          required: true,
+          default:"بانتظار التعليمات"
+      },
+      en: {
+        type: String,
+        enum: [
+          "Awaiting Instructions",
+          "In Progress",
+          "Awaiting Confirmation",
+          "Delivered",
+          "Canceled",
+        ],
+        required: true,
+        default:"Awaiting Confirmation"
+      }
     },
     order_number: {
       type: Number,

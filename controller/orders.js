@@ -30,7 +30,40 @@ export const getAll = async (req, res) => {
 export const getOrdersByUser = async (req, res) => {
   try {
     const userId = req.user.id
-    const result = await orders.find({user_id: userId})
+    const statusParam = req.query.status
+    const statusValues = statusParam ? statusParam.split(',') : undefined
+    const filter = statusValues ? {user_id: userId, 'status.en': {'$in': statusValues}} : {user_id: userId}
+    const result = await orders.find(filter)
+    .populate({
+      path: 'items.service_id',  
+      select: ['title', 'userId'],            
+      populate: {
+        path: 'userId',                       
+        select: ['first_name', 'last_name', 'profilePicture'],  
+      },
+    })
+    .exec();
+    if (!result.length) {
+      return res.status(404).json({ success: false, message: "No orders found" });
+    }
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error while retrieving orders", error: error.message });
+  }
+};
+
+export const getOrdersSoldByUser = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const statusParam = req.query.status
+    const statusValues = statusParam ? statusParam.split(',') : undefined
+    const filter = statusValues ? {
+      'items.service_id.userId._id': userId, 
+      'status.en': {'$in': statusValues}
+    } : {
+      'items.service_id.userId._id': userId
+    }
+    const result = await orders.find(filter)
     .populate({
       path: 'items.service_id',  
       select: ['title', 'userId'],            
