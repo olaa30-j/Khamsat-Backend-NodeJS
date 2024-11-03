@@ -24,8 +24,10 @@ export const createService = async (req, res) => {
     }
 
     try {
-        if (!categoryId || !subcategoryId) {
-            return res.status(400).json({ message: "Category and Subcategory are required" });
+        const checkCategory = await categoriesModel.findById(categoryId)
+        const checkSubCategorie= await SubCategories.findById(subcategoryId)
+        if (!checkCategory || !checkSubCategorie) {
+            return res.status(400).json({ message: "Category and Subcategory are required correctly" });
         }
 
         const newService = new Service({
@@ -102,7 +104,7 @@ export const filterServices = async (req, res) => {
         const services = await Service.find(filter)
             .populate('category', 'name')
             .populate('subcategory', 'title')
-            .populate('userId', ['profilePicture', '-_id'])
+            .populate('userId', ['profilePicture', 'username', '-_id'])
             .select('-status')
 
         res.status(200).json(services);
@@ -118,6 +120,7 @@ export const getUsersServices = async (req, res) => {
         const services = await Service.find({status: 'accepted'})
             .populate('category', 'name')
             .populate('subcategory', 'title')
+            .populate('userId', ['profilePicture', 'username', '-_id'])
             .select('-userId');
 
         res.status(200).json({ services });
@@ -133,8 +136,7 @@ export const getServices = async (req, res) => {
         const services = await Service.find()
             .populate('category', 'name')
             .populate('subcategory', 'title')
-            .populate('userId', ['profilePicture', 'username', '-_id'])
-
+            .populate('userId', ['profilePicture', 'username', '-_id']);
         res.status(200).json(services);
     } catch (err) {
         res.status(500).json({ message: "Server failed to get services" });

@@ -106,7 +106,7 @@ const serviceSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['waiting', 'accepted', 'paused'],
+      enum: ['waiting', 'active', 'paused', 'rejected'],
       default: 'waiting', 
       required: true,
     }

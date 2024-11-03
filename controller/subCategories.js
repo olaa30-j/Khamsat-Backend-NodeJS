@@ -31,7 +31,6 @@ export const createSubcategories = async (req, res) => {
 
         await newSubCategories.save();
 
-
         res.status(201).json({ message: 'Subcategory created successfully', newSubCategories });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -39,6 +38,20 @@ export const createSubcategories = async (req, res) => {
 };
 
 
+// //////////////////////////////////////////////////////////////////////////////////////////////////// //
+// Get subcategories 
+export const getSubcategories = async (req, res) => {
+    try {
+        const subcategories = await SubCategories.find();
+        if (!subcategories) {
+            return res.status(404).json({ message: 'Subcategories not found' });
+        }
+
+        res.status(200).json({ subcategories: subcategories });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////// //
 // Get subcategories by id
