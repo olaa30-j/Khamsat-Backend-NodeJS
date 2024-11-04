@@ -40,7 +40,7 @@ export const authenticateUser = (req, res, next) => {
 export const checkRoles = (...roles) => {
     return (req, res, next) => {
         if (!req.user.role) {
-            return res.status(401).send({ message: 'User not authenticated.' });
+            return res.status(401).send({ message: 'User not authorized to perform this action. Check user role' });
         }
         
         if (!roles.includes(req.user.role)) {
