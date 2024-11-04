@@ -114,7 +114,6 @@ export const updateCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
     try {
         const { categoryId } = req.params;
-        console.log(categoryId);
 
         const category = await categoriesModel.findByIdAndDelete(categoryId);
         if (!category) {
@@ -124,7 +123,6 @@ export const deleteCategory = async (req, res) => {
         const allSubcategories = await SubCategories.find({category_id: category});
         const subcategories = [...allSubcategories]
 
-        console.log(category, allSubcategories, subcategories);
 
         if (subcategories) {
             for (const subcategory of subcategories) {

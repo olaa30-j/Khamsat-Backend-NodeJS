@@ -16,7 +16,6 @@ export const UpdateService = async (serviceId) => {
             ? serviceReviews.reduce((acc, current) => acc + (current.overallRating || 0), 0) / serviceReviews.length
             : 0;
 
-        console.log(service.serviceCard);
         await service.save();
     } catch (err) {
         console.error('Error updating service:', err);

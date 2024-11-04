@@ -41,7 +41,6 @@ export const logout = (req, res) => {
 
 export const create = async (req, res) => {
   const { email, password, ...otherFields } = req.body;
-  console.log(req);
   
 
   if (!email || !password) {
@@ -61,8 +60,20 @@ export const create = async (req, res) => {
   
     const hashedPassword = await bcrypt.hash(password, 10);
     user = await users.create({ email, password: hashedPassword, profilePicture: image, ...otherFields });
+    const payload = {
+      id: user._id,
+      email: user.email,
+      role: user.account_type,
+    };
+    const token = jwt.sign(payload, process.env.SECRET_KEY);
 
-    res.status(200).json({ message: "Success", data: { user } });
+    res.cookie("authToken", token, {
+      maxAge: 24 * 60 * 60 * 1000, 
+      httpOnly: true,               
+      secure: process.env.NODE_ENV === 'production', 
+      path: '/',                    
+  });
+    res.status(200).json({ message: "Success", data: { user, token } });
   } catch (error) {
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: "Validation failed", error: error.message });
@@ -110,7 +121,6 @@ export const getAll = async (req, res) => {
       return res.status(404).send({ message: "No users were found" });
     }
     
-    console.log(result); 
     res.status(200).send(result);
   } catch (error) {
     console.error("Error fetching users:", error); 
