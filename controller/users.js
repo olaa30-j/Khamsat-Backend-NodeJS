@@ -25,6 +25,7 @@ export const login = async (req, res) => {
       httpOnly: true,               
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : '.localhost',
       path: '/',                    
   });
 
@@ -73,6 +74,7 @@ export const create = async (req, res) => {
       httpOnly: true,               
       secure: process.env.NODE_ENV === 'production', 
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : '.localhost',
       path: '/',                    
   });
     res.status(200).json({ message: "Success", data: { user, token } });
