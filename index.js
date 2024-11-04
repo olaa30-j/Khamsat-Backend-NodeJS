@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
@@ -13,7 +12,6 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// إعداد Socket.IO مع CORS
 export const io = new SocketIO(server, {
   cors: {
     origin: true,
@@ -21,13 +19,11 @@ export const io = new SocketIO(server, {
   },
 });
 
-// تخزين اتصالات المستخدمين
 const connectedUsers = new Map();
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  // تسجيل المستخدم عند الاتصال
   socket.on('register', (username) => {
     if (username) {
       console.log(`User ${username} registered with socket ${socket.id}`);
@@ -43,7 +39,6 @@ io.on('connection', (socket) => {
     console.log('New service notification sent to admin');
   });
 
-  // قبول الخدمة
   socket.on('serviceStatusUpdated', (data) => {
     const { userId, message } = data;
     if (userId && connectedUsers.has(userId)) {
@@ -52,7 +47,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // معالجة قطع الاتصال
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
     for (const [username, id] of connectedUsers.entries()) {
@@ -65,11 +59,9 @@ io.on('connection', (socket) => {
   });
 });
 
-// إضافة ميدلوير لمشاركة io مع الراوترز
 app.set('io', io);
 app.set('connectedUsers', connectedUsers);
 
-// إعداد الميدلوير
 app.use(cors({
   origin: true,
   credentials: true,
@@ -79,19 +71,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/public', express.static('public'));
 
-// الراوترز
+
 app.use(router);
 
-// الاتصال بقاعدة البيانات
 connectDB();
 
-// تشغيل السيرفر
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// تصدير دوال مساعدة للإشعارات
 export const sendNotification = (username, message) => {
   if (username && connectedUsers.has(username)) {
     io.to(username).emit('notification', { message });
