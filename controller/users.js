@@ -20,14 +20,6 @@ export const login = async (req, res) => {
     };
     const token = jwt.sign(payload, process.env.SECRET_KEY);
 
-    res.cookie("authToken", token, {
-      maxAge: 24 * 60 * 60 * 1000, 
-      httpOnly: true,               
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : '.localhost',
-      path: '/',                    
-  });
 
     res.status(200).json({ message: "Success", data: { token } });
   } catch (error) {
@@ -42,7 +34,7 @@ export const logout = (req, res) => {
 
 
 export const create = async (req, res) => {
-  const { email, password, ...otherFields } = req.body;
+  const { email, password, username, ...otherFields } = req.body;
   
 
   if (!email || !password) {
@@ -60,8 +52,8 @@ export const create = async (req, res) => {
       image = req.file.path.replace(/\\/g, '/'); 
     }
   
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user = await users.create({ email, password: hashedPassword, profilePicture: image, ...otherFields });
+    const hashedPassword = await bcrypt.hash(password, 10);  
+    user = await users.create({ email, password: hashedPassword, profilePicture: image, username: username || email.split('@')[0], ...otherFields });
     const payload = {
       id: user._id,
       email: user.email,
@@ -69,14 +61,6 @@ export const create = async (req, res) => {
     };
     const token = jwt.sign(payload, process.env.SECRET_KEY);
 
-    res.cookie("authToken", token, {
-      maxAge: 24 * 60 * 60 * 1000, 
-      httpOnly: true,               
-      secure: process.env.NODE_ENV === 'production', 
-      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : '.localhost',
-      path: '/',                    
-  });
     res.status(200).json({ message: "Success", data: { user, token } });
   } catch (error) {
     if (error.name === "ValidationError") {
