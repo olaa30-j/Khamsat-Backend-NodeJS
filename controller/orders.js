@@ -8,7 +8,20 @@ import users from "../models/users.js";
 export const get = async (req, res) => {
   const { id } = req.params;
   try {
-    const order = await orders.findById(id);
+    const order = await orders.findById(id)
+    .populate({
+      path: 'items.service_id',  
+      select: ['title', 'userId'],            
+      populate: {
+        path: 'userId',                       
+        select: ['first_name', 'last_name', 'profilePicture'],  
+      },
+    })
+    .populate({
+      path: 'user_id',
+      select: ['first_name', 'last_name', 'profilePicture', '_id'],
+    })
+    .exec();
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
@@ -38,15 +51,20 @@ export const getOrdersByUser = async (req, res) => {
     const statusValues = statusParam ? statusParam.split(',') : undefined
     const filter = statusValues ? { user_id: userId, 'status.en': { '$in': statusValues } } : { user_id: userId }
     const result = await orders.find(filter)
-      .populate({
-        path: 'items.service_id',
-        select: ['title', 'userId'],
-        populate: {
-          path: 'userId',
-          select: ['first_name', 'last_name', 'profilePicture'],
-        },
-      })
-      .exec();
+    .populate({
+      path: 'items.service_id',  
+      select: ['title', 'userId'],            
+      populate: {
+        path: 'userId',                       
+        select: ['first_name', 'last_name', 'profilePicture'],  
+      },
+    })
+    .populate({
+      path: 'user_id',
+      select: ['first_name', 'last_name', 'profilePicture', '_id'],
+    })
+    .sort({createdAt: 'desc'})
+    .exec();
     if (!result.length) {
       return res.status(404).json({ success: false, message: "No orders found" });
     }
@@ -61,22 +79,29 @@ export const getOrdersSoldByUser = async (req, res) => {
     const userId = req.user.id
     const statusParam = req.query.status
     const statusValues = statusParam ? statusParam.split(',') : undefined
-    const filter = statusValues ? {
-      'items.service_id.userId._id': userId,
-      'status.en': { '$in': statusValues }
-    } : {
-      'items.service_id.userId._id': userId
-    }
-    const result = await orders.find(filter)
+    const statusFilter = statusValues ? { 'status.en': { $in: statusValues } } : {};
+    
+    // Fetch all matching orders based on status
+    let result = await orders.find(statusFilter)
       .populate({
-        path: 'items.service_id',
-        select: ['title', 'userId'],
+        path: 'items.service_id',  
+        select: ['title', 'userId'],            
         populate: {
-          path: 'userId',
-          select: ['first_name', 'last_name', 'profilePicture'],
+          path: 'userId',                       
+          select: ['first_name', 'last_name', 'profilePicture', '_id'],  
         },
       })
+      .populate({
+        path: 'user_id',
+        select: ['first_name', 'last_name', 'profilePicture', '_id'],
+      })
+      .sort({createdAt: 'desc'})
       .exec();
+
+    // Filter in-memory by `userId`
+    result = result.filter(order =>
+      order.items.some(item => item.service_id.userId._id.toString() === userId)
+    );
     if (!result.length) {
       return res.status(404).json({ success: false, message: "No orders found" });
     }

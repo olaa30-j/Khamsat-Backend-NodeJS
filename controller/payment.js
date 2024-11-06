@@ -29,7 +29,6 @@ export const createPaymentIntent = async (req, res) => {
 const handlePaymentIntentSucceeded = async (paymentIntent)=> {
         const order = JSON.parse(paymentIntent.metadata.order)
         const userId = paymentIntent.metadata.userId
-        console.log(order, userId);
         await createOrderAfterPayment(order, userId)        
 }
 
@@ -110,7 +109,6 @@ const createOrder = async (order) => {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  console.log(response.status)
   return handleResponse(response);
 };
 
@@ -148,7 +146,6 @@ const captureOrder = async (orderID, order, userId) => {
 async function handleResponse(response) {
   try {
     const jsonResponse = await response.json();
-    console.log(JSON.stringify(jsonResponse))
     return {
       jsonResponse,
       httpStatusCode: response.status,

@@ -20,12 +20,6 @@ export const login = async (req, res) => {
     };
     const token = jwt.sign(payload, process.env.SECRET_KEY);
 
-    res.cookie("authToken", token, {
-      maxAge: 24 * 60 * 60 * 1000, 
-      httpOnly: true,               
-      secure: process.env.NODE_ENV === 'production', 
-      path: '/',                    
-  });
 
     res.status(200).json({ message: "Success", data: { token } });
   } catch (error) {
@@ -40,8 +34,7 @@ export const logout = (req, res) => {
 
 
 export const create = async (req, res) => {
-  const { email, password, ...otherFields } = req.body;
-  console.log(req);
+  const { email, password, username, ...otherFields } = req.body;
   
 
   if (!email || !password) {
@@ -59,10 +52,16 @@ export const create = async (req, res) => {
       image = req.file.path.replace(/\\/g, '/'); 
     }
   
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user = await users.create({ email, password: hashedPassword, profilePicture: image, ...otherFields });
+    const hashedPassword = await bcrypt.hash(password, 10);  
+    user = await users.create({ email, password: hashedPassword, profilePicture: image, username: username || email.split('@')[0], ...otherFields });
+    const payload = {
+      id: user._id,
+      email: user.email,
+      role: user.account_type,
+    };
+    const token = jwt.sign(payload, process.env.SECRET_KEY);
 
-    res.status(200).json({ message: "Success", data: { user } });
+    res.status(200).json({ message: "Success", data: { user, token } });
   } catch (error) {
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: "Validation failed", error: error.message });
@@ -110,7 +109,6 @@ export const getAll = async (req, res) => {
       return res.status(404).send({ message: "No users were found" });
     }
     
-    console.log(result); 
     res.status(200).send(result);
   } catch (error) {
     console.error("Error fetching users:", error); 
@@ -121,8 +119,16 @@ export const getAll = async (req, res) => {
 
 export const update = async (req, res) => {
   const { id } = req.params;
+  const { password, ...otherFields } = req.body;
+
   try {
-    const user = await users.findByIdAndUpdate(id, req.body, { new: true });
+    let user
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user = await users.findByIdAndUpdate(id, {password: hashedPassword, ...otherFields}, { new: true });
+    } else {
+      user = await users.findByIdAndUpdate(id, {...otherFields}, { new: true });
+    }
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

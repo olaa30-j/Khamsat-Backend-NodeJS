@@ -1,11 +1,12 @@
 import {Router}from 'express';
 let router = Router();
 
-import {createMessage,getMessage,getMessageById,editMessageById,deleteMessageById} from '../controller/messages.js';
+import {createMessage,getMessage,getMessagesByOrder, getMessageById,editMessageById,deleteMessageById} from '../controller/messages.js';
 
 router.post("/",createMessage);
 
-router.get("/",getMessage);
+router.get("/", getMessage);
+router.get("/order/:orderId", getMessagesByOrder);
 router.get("/:id",getMessageById)
 
 router.patch("/:id",editMessageById)
