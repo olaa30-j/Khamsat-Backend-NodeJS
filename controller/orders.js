@@ -4,7 +4,20 @@ import orders from "../models/orders.js";
 export const get = async (req, res) => {
   const { id } = req.params;
   try {
-    const order = await orders.findById(id);
+    const order = await orders.findById(id)
+    .populate({
+      path: 'items.service_id',  
+      select: ['title', 'userId'],            
+      populate: {
+        path: 'userId',                       
+        select: ['first_name', 'last_name', 'profilePicture'],  
+      },
+    })
+    .populate({
+      path: 'user_id',
+      select: ['first_name', 'last_name', 'profilePicture', '_id'],
+    })
+    .exec();
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
@@ -46,6 +59,7 @@ export const getOrdersByUser = async (req, res) => {
       path: 'user_id',
       select: ['first_name', 'last_name', 'profilePicture', '_id'],
     })
+    .sort({createdAt: 'desc'})
     .exec();
     if (!result.length) {
       return res.status(404).json({ success: false, message: "No orders found" });
@@ -77,6 +91,7 @@ export const getOrdersSoldByUser = async (req, res) => {
         path: 'user_id',
         select: ['first_name', 'last_name', 'profilePicture', '_id'],
       })
+      .sort({createdAt: 'desc'})
       .exec();
 
     // Filter in-memory by `userId`
