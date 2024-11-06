@@ -12,6 +12,21 @@ export const createMessage= async (req, res) => {
       res.status(400).json({ message: "failed to create message" });
     }};
 
+//============  Getting Messages By order : using skip = 0 & limit = 10 as default or from user query ======================//
+
+export const getMessagesByOrder = async (req,res) => {
+  const skip = parseInt(req.query.skip) || 0;
+  const limit = parseInt(req.query.limit) || 10;
+  const {orderId} =  req.params
+
+  try{
+  const fetchedMessages = await messageModel.find({order_id: orderId}).skip(skip).limit(limit);
+  res.status(201).json({message:"fetched messages succesfully",data:fetchedMessages});
+
+  } catch(err){
+    console.log(err)
+       res.status(500).json({message:"err cannot get messages",err});
+  }};
 //============  Getting Messages : using skip = 0 & limit = 5 as default or from user query ======================//
 
 export const getMessage = async (req,res) => {
