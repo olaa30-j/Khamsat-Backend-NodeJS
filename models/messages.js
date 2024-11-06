@@ -39,24 +39,12 @@ let messageSchema = new Schema(
     order_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Orders",
-      required: true,
-    },
-
-    createdAt: {
-      type: Date,
-      default: Date.now,
+      required: false,
     },
   },
 
-  {
-    timestamp: true,
-  }
+  { timestamps: true }
 );
-
-messageSchema.pre("save", function (next) {
-  this.createdAt = Date.now();
-  next();
-});
 
 let messageModel = model("Message", messageSchema);
 export default messageModel;
