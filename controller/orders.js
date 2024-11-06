@@ -1,4 +1,8 @@
+import { io } from "../index.js";
 import orders from "../models/orders.js";
+import Service from "../models/service.js";
+import users from "../models/users.js";
+
 
 // Get a single order by ID
 export const get = async (req, res) => {
@@ -32,17 +36,17 @@ export const getOrdersByUser = async (req, res) => {
     const userId = req.user.id
     const statusParam = req.query.status
     const statusValues = statusParam ? statusParam.split(',') : undefined
-    const filter = statusValues ? {user_id: userId, 'status.en': {'$in': statusValues}} : {user_id: userId}
+    const filter = statusValues ? { user_id: userId, 'status.en': { '$in': statusValues } } : { user_id: userId }
     const result = await orders.find(filter)
-    .populate({
-      path: 'items.service_id',  
-      select: ['title', 'userId'],            
-      populate: {
-        path: 'userId',                       
-        select: ['first_name', 'last_name', 'profilePicture'],  
-      },
-    })
-    .exec();
+      .populate({
+        path: 'items.service_id',
+        select: ['title', 'userId'],
+        populate: {
+          path: 'userId',
+          select: ['first_name', 'last_name', 'profilePicture'],
+        },
+      })
+      .exec();
     if (!result.length) {
       return res.status(404).json({ success: false, message: "No orders found" });
     }
@@ -58,21 +62,21 @@ export const getOrdersSoldByUser = async (req, res) => {
     const statusParam = req.query.status
     const statusValues = statusParam ? statusParam.split(',') : undefined
     const filter = statusValues ? {
-      'items.service_id.userId._id': userId, 
-      'status.en': {'$in': statusValues}
+      'items.service_id.userId._id': userId,
+      'status.en': { '$in': statusValues }
     } : {
       'items.service_id.userId._id': userId
     }
     const result = await orders.find(filter)
-    .populate({
-      path: 'items.service_id',  
-      select: ['title', 'userId'],            
-      populate: {
-        path: 'userId',                       
-        select: ['first_name', 'last_name', 'profilePicture'],  
-      },
-    })
-    .exec();
+      .populate({
+        path: 'items.service_id',
+        select: ['title', 'userId'],
+        populate: {
+          path: 'userId',
+          select: ['first_name', 'last_name', 'profilePicture'],
+        },
+      })
+      .exec();
     if (!result.length) {
       return res.status(404).json({ success: false, message: "No orders found" });
     }
@@ -113,6 +117,7 @@ export const createOrderAfterPayment = async (order, userId) => {
     throw new Error("Missing required field items")
   }
   const itemsArray = items.items
+  // console.log(itemsArray)
   if (!itemsArray) {
     throw new Error("Missing required field items")
   }
@@ -122,18 +127,28 @@ export const createOrderAfterPayment = async (order, userId) => {
       item.upgrades.forEach(u => upgrades.push(u.upgradeId))
       const newOrder = {
         user_id: userId,
-        order_number: Math.floor( Math.random() * 99999999 ),
+        order_number: Math.floor(Math.random() * 99999999),
         items: [{
           service_id: item.serviceId,
           quantity: item.quantity,
           upgrades: upgrades
         }]
       }
+      const serviceUser = await Service.findById(item.serviceId)
+        .select('username')
+        .populate('userId', 'username');
+      const orderUser = await users.findById(userId)
+      const notification = {
+        status: "beyService",
+        id: Math.floor(Math.random() * 99999999),
+        message: `مبارك عليك قام ${orderUser.first_name.en} بشراء خدمتك`,
+      }
+      io.to(String(serviceUser.userId._id)).emit('notification', { notification: notification })
       await orders.create(newOrder)
     })
 
   } catch (error) {
-      throw new Error("Failed to create order")
+    throw new Error("Failed to create order")
   }
 
 }
