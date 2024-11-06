@@ -20,7 +20,14 @@ export const getMessagesByOrder = async (req,res) => {
   const {orderId} =  req.params
 
   try{
-  const fetchedMessages = await messageModel.find({order_id: orderId}).skip(skip).limit(limit);
+  const fetchedMessages = await messageModel.find({order_id: orderId})
+  .skip(skip)
+  .limit(limit)
+  .populate({
+    path: 'sender_id',
+    select: ['first_name', 'last_name', 'profilePicture'],
+  })
+  .exec()
   res.status(201).json({message:"fetched messages succesfully",data:fetchedMessages});
 
   } catch(err){
