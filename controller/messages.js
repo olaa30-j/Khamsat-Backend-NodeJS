@@ -27,7 +27,7 @@ export const createMessage = async (req, res) => {
 
 export const getMessagesByOrder = async (req, res) => {
   const skip = parseInt(req.query.skip) || 0;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 50;
   const { orderId } = req.params
 
   try {

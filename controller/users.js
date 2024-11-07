@@ -9,7 +9,8 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const isVerified = bcrypt.compare(password, user.password);
+    const isVerified = await bcrypt.compare(password, user.password);
+    
     if (!isVerified) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -51,8 +52,8 @@ export const create = async (req, res) => {
     if (req.file && req.file.path) {
       image = req.file.path.replace(/\\/g, '/'); 
     }
-  
-    const hashedPassword = await bcrypt.hash(password, 10);  
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
     user = await users.create({ email, password: hashedPassword, profilePicture: image, username: username || email.split('@')[0], ...otherFields });
     const payload = {
       id: user._id,
@@ -120,11 +121,17 @@ export const getAll = async (req, res) => {
 export const update = async (req, res) => {
   const { id } = req.params;
   const { password, ...otherFields } = req.body;
-
+  let imagesFiles = [];
+  
+  if (req.files && req.files.profilePicture) {
+      imagesFiles = req.files.profilePicture.map(file => file.path.replace(/\\/g, '/'));
+      otherFields.profilePicture = imagesFiles[0]
+  }
   try {
     let user
     if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
       user = await users.findByIdAndUpdate(id, {password: hashedPassword, ...otherFields}, { new: true });
     } else {
       user = await users.findByIdAndUpdate(id, {...otherFields}, { new: true });
