@@ -50,8 +50,8 @@ class SocketService {
   }
 
   notifyAdmin(message) {
-    this.io.to('admin').emit('notification', {
-      message: `New service: ${message}`
+    this.io.emit('serviceCreated', {
+      message: `${message}`
     });
     console.log('New service notification sent to admin');
   }
