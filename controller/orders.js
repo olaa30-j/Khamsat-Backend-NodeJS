@@ -166,7 +166,7 @@ export const createOrderAfterPayment = async (order, userId) => {
       const notification = {
         status: "beyService",
         id: Math.floor(Math.random() * 99999999),
-        message: `مبارك عليك قام ${orderUser.first_name.en} بشراء خدمتك`,
+        message: `مبارك عليك قام ${orderUser.first_name.ar} بشراء خدمتك`,
       }
       io.to(String(serviceUser.userId._id)).emit('notification', { notification: notification })
       await orders.create(newOrder)
