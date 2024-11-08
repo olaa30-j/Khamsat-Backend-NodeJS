@@ -41,7 +41,6 @@ export const logout = (req, res) => {
 
 export const create = async (req, res) => {
   const { email, password, ...otherFields } = req.body;
-  console.log(req);
   
 
   if (!email || !password) {
@@ -110,7 +109,6 @@ export const getAll = async (req, res) => {
       return res.status(404).send({ message: "No users were found" });
     }
     
-    console.log(result); 
     res.status(200).send(result);
   } catch (error) {
     console.error("Error fetching users:", error); 

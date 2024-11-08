@@ -6,12 +6,12 @@ import {
     getUpgradeServiceById, 
     updateUpgrade 
 } from '../controller/upgradeService.js';
-import { checkRoles, verfiyToken } from '../middleware/auth.js';
+import { authenticateUser, checkRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // create upgrade
-router.post('/', createUpgradeService);
+router.post('/:serviceId', authenticateUser, checkRoles('seller'), createUpgradeService);
 
 // create upgrade
 router.get('/:serviceId', getAllServiceUpgrades);
@@ -20,9 +20,9 @@ router.get('/:serviceId', getAllServiceUpgrades);
 router.get('/upgrade/:serviceId/:upgradeId', getUpgradeServiceById);
 
 // update upgrade
-router.patch('/:upgradeId', verfiyToken, checkRoles('seller'), updateUpgrade);
+router.patch('/:upgradeId', authenticateUser, checkRoles('seller'), updateUpgrade);
 
 // delete upgrade
-router.delete('/:upgradeId', verfiyToken, checkRoles('seller'), deleteUpgrade);
+router.delete('/:upgradeId', authenticateUser, checkRoles('seller'), deleteUpgrade);
 
 export default router;

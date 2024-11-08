@@ -99,7 +99,6 @@ const createFilter = async (query) => {
 export const filterServices = async (req, res) => {
     try {
         const filter = await createFilter(req.query);
-        console.log('Filter used for querying services:', filter);
 
         const services = await Service.find(filter)
             .populate('category', 'name')

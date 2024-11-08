@@ -2,19 +2,30 @@ import UpgradeService from "../models/upgradeService.js";
 
 // create upgrade
 export const createUpgradeService = async (req, res) => {
-    const { title, price, deliveryTime, serviceId } = req.body;
+    const {serviceId} = req.params;
+    const upgrades = req.body.upgrades; 
+
+    if (!Array.isArray(upgrades) || upgrades.length === 0) {
+        return res.status(400).json({ message: 'Please provide an array of upgrades' });
+    }
+
+    for (const upgrade of upgrades) {
+        const { title, price, deliveryTime } = upgrade;
+        console.log(title, price, deliveryTime);
+    }
 
     try {
-        const newUpgradeService = new UpgradeService({
-            title,
-            price,
-            deliveryTime,
-            serviceId
+        const newUpgrades = await UpgradeService.insertMany(
+            upgrades.map( upgrade => ({
+                ...upgrade,
+                serviceId: serviceId 
+            }))
+        );
+
+        res.status(201).json({
+            message: `${newUpgrades.length} Upgrade Service(s) created successfully`,
+            newUpgrades
         });
-
-        await newUpgradeService.save();
-
-        res.status(201).json({ message: "Upgrade Service created successfully", newUpgradeService });
     } catch (err) {
         res.status(500).json({ message: "Server failed to create Upgrade Service" });
     }
