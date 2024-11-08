@@ -2,6 +2,9 @@ import Service from "../models/service.js";
 import UpgradeService from "../models/upgradeService.js";
 import categoriesModel from '../models/categories.js';
 import SubCategories from '../models/subCategories.js';
+import { io } from "../index.js";
+import users from "../models/users.js";
+import socketService from "../services/socketService.js";
 
 // create service
 export const createService = async (req, res) => {
@@ -43,8 +46,10 @@ export const createService = async (req, res) => {
             status: 'waiting',
             deliveryTime
         });
-
+        const serviceUser = await users.findById(userId)
         const savedService = await newService.save();
+        console.log(savedService,title)
+        socketService.notifyAdmin(`${serviceUser.first_name.en?.toString()} added a new service: ${title.en}`)
         res.status(201).json({ message: "Service created successfully", savedService });
     } catch (err) {
         res.status(500).json({ message: "Server failed to create service", error: err.message });
@@ -116,7 +121,9 @@ export const filterServices = async (req, res) => {
 // get Users services
 export const getUsersServices = async (req, res) => {
     try {
-        const services = await Service.find({status: 'accepted'})
+        const filter = await createFilter(req.query);
+        filter.status = 'active'
+        const services = await Service.find(filter)
             .populate('category', 'name')
             .populate('subcategory', 'title')
             .populate('userId', ['profilePicture', 'username', '-_id'])

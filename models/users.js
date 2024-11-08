@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 import validator from "validator";
 
 
@@ -78,24 +77,6 @@ const usersSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-usersSchema.pre("save", function (next) {
-  if (this.isModified("password")) {
-    let user = this;
-    bcrypt
-      .genSalt(10)
-      .then((salt) => {
-        bcrypt.hash(user.password, salt).then((hash) => {
-          user.password = hash;
-          next();
-        });
-      })
-      .catch(() => {
-        throw new Error("Cannot create/update user");
-      });
-  } else {
-    next();
-  }
-});
 const users = mongoose.model("Users", usersSchema);
 
 export default users;

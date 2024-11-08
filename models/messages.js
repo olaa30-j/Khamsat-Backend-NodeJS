@@ -6,7 +6,6 @@ let messageSchema = new Schema(
       type: String,
       required: true,
       minLength: 5,
-      maxLength: 100,
     },
 
     archived: {
@@ -26,28 +25,26 @@ let messageSchema = new Schema(
     },
 
     sender_id: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true,
     },
 
     receiver_id: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true,
     },
 
-    createdAt: {
-      type: Date,
-      default: Date.now,
+    order_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Orders",
+      required: false,
     },
   },
 
-  {
-    timestamp: true,
-  }
+  { timestamps: true }
 );
-
-messageSchema.pre("save", function (next) {
-  this.createdAt = Date.now();
-  next();
-});
 
 let messageModel = model("Message", messageSchema);
 export default messageModel;

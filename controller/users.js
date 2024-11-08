@@ -9,7 +9,8 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const isVerified = bcrypt.compare(password, user.password);
+    const isVerified = await bcrypt.compare(password, user.password);
+    
     if (!isVerified) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -20,12 +21,6 @@ export const login = async (req, res) => {
     };
     const token = jwt.sign(payload, process.env.SECRET_KEY);
 
-    res.cookie("authToken", token, {
-      maxAge: 24 * 60 * 60 * 1000, 
-      httpOnly: true,               
-      secure: process.env.NODE_ENV === 'production', 
-      path: '/',                    
-  });
 
     res.status(200).json({ message: "Success", data: { token } });
   } catch (error) {
@@ -40,7 +35,7 @@ export const logout = (req, res) => {
 
 
 export const create = async (req, res) => {
-  const { email, password, ...otherFields } = req.body;
+  const { email, password, username, ...otherFields } = req.body;
   
 
   if (!email || !password) {
@@ -57,11 +52,17 @@ export const create = async (req, res) => {
     if (req.file && req.file.path) {
       image = req.file.path.replace(/\\/g, '/'); 
     }
-  
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user = await users.create({ email, password: hashedPassword, profilePicture: image, ...otherFields });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    user = await users.create({ email, password: hashedPassword, profilePicture: image, username: username || email.split('@')[0], ...otherFields });
+    const payload = {
+      id: user._id,
+      email: user.email,
+      role: user.account_type,
+    };
+    const token = jwt.sign(payload, process.env.SECRET_KEY);
 
-    res.status(200).json({ message: "Success", data: { user } });
+    res.status(200).json({ message: "Success", data: { user, token } });
   } catch (error) {
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: "Validation failed", error: error.message });
@@ -119,8 +120,22 @@ export const getAll = async (req, res) => {
 
 export const update = async (req, res) => {
   const { id } = req.params;
+  const { password, ...otherFields } = req.body;
+  let imagesFiles = [];
+  
+  if (req.files && req.files.profilePicture) {
+      imagesFiles = req.files.profilePicture.map(file => file.path.replace(/\\/g, '/'));
+      otherFields.profilePicture = imagesFiles[0]
+  }
   try {
-    const user = await users.findByIdAndUpdate(id, req.body, { new: true });
+    let user
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      user = await users.findByIdAndUpdate(id, {password: hashedPassword, ...otherFields}, { new: true });
+    } else {
+      user = await users.findByIdAndUpdate(id, {...otherFields}, { new: true });
+    }
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

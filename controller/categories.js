@@ -123,6 +123,7 @@ export const deleteCategory = async (req, res) => {
         const allSubcategories = await SubCategories.find({category_id: category});
         const subcategories = [...allSubcategories]
 
+
         if (subcategories) {
             for (const subcategory of subcategories) {
                 await  SubCategories.findByIdAndDelete({_id: subcategory._id})
